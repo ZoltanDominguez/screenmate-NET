@@ -7,10 +7,10 @@ namespace ScreenMateNET
 	public enum ScreenMateStateID
 	{
 		Idle,
-		RunLeft,
-		RinRight,
+		CursorChasing,
 		Bored,
 		WarmCPU,
-		Cold
+		Cold,
+		SittingOnTopOfWindow
 	}
 }
