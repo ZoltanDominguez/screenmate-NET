@@ -9,7 +9,10 @@ namespace ScreenMateNET
 		// Singleton pattern
 		private static LocalSettings instance = null;
 
-		public Dictionary<ScreenMateStateID, StateSetting> StateSettings { get; set; }
+		public Dictionary<ScreenMateStateID, StateSetting> StateSettings { get; private set; }
+
+		public event Action SettingsChanged;
+
 		private LocalSettings()
 		{
 			StateSettings = new Dictionary<ScreenMateStateID, StateSetting>();
@@ -25,6 +28,14 @@ namespace ScreenMateNET
 					instance = new LocalSettings();
 				return instance;
 			}
+		}
+
+		public void ChangeSettings(ScreenMateStateID id, StateSetting stateSetting)
+		{
+			this.StateSettings[id].FilePath = stateSetting.FilePath;
+			this.StateSettings[id].IsActivated = stateSetting.IsActivated;
+			// kimentés
+			SettingsChanged.Invoke();
 		}
 	}
 }
