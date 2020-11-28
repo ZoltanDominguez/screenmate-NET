@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms.Design;
 
 namespace ScreenMateNET
 {
 	class SMCpuWatcher : SMEventSenderBase
 	{
-		public SMCpuWatcher()
+		public SMCpuWatcher():base(ScreenMateStateID.WarmCPU)
 		{
-			State = ScreenMateStateEnum.Warm; // azonosításra lesz
+
 		}
 
 		protected override void EventListenerFunction()

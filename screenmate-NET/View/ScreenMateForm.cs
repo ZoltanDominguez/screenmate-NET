@@ -13,12 +13,12 @@ namespace ScreenMateNET
 {
 	public partial class ScreenMateForm : Form
 	{
-		ScreenMateVMClient screenMateVMClient;
+		IScreenMateVMClient screenMateVMClient;
 
 		public ScreenMateForm()
 		{
 			InitializeComponent();
-			screenMateVMClient = new ScreenMateVMClient();
+			screenMateVMClient = ScreenMateVMClient.Instance;
 			screenMateVMClient.DrawNeededEvent += DrawNeededEventHandler;
 		}
 

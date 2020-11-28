@@ -1,26 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace ScreenMateNET
 {
 	public class Reactor
 	{
-		Dictionary<ScreenMateStateEnum, ISMEventSender> eventSenders;
+		public event Action<ScreenMateStateID, bool> EventReceivedEvent;
+
+		private Dictionary<ScreenMateStateID, ISMEventSender> EventSenders { get; set; }
+
 		public Reactor()
 		{
 			// Eseményküldők létrehozása, nyílvántartása Dict-ben.
-			eventSenders = new Dictionary<ScreenMateStateEnum, ISMEventSender>();
-			SMCpuWatcher sMCpuWatcher = new SMCpuWatcher();
-			sMCpuWatcher.ActiveStateChanged += CpuEventHandler;
-			eventSenders.Add(sMCpuWatcher.State, sMCpuWatcher);
-			// Eseménykezelő fv -> továbbítja az azont. a VM-nek. - Továbbdob egy eseményt <Enum>-al?
+			EventSenders = new Dictionary<ScreenMateStateID, ISMEventSender>();
+
+			// Instantiate and add EventSenders to Dictionary
+			AddEventSenderToDict(new SMCpuWatcher());
+
+			// Subscribe GeneralLocalEventHandler to each EventSender's event
+			foreach (ISMEventSender eventSender in EventSenders.Values)
+			{
+				eventSender.ActiveStateChanged += GeneralLocalEventHandler;
+			}
 		}
 
-		private void CpuEventHandler()
+		private void GeneralLocalEventHandler(ScreenMateStateID stateID)
 		{
-			throw new NotImplementedException();
-			// VM state-jének változtatása, ő pedig értesesíti a View-t
+			if (EventReceivedEvent != null)
+				EventReceivedEvent.Invoke(stateID, EventSenders[stateID].IsActive);
+		}
+
+		private void AddEventSenderToDict( ISMEventSender eventSender)
+		{
+			EventSenders.Add(eventSender.StateID, eventSender);
 		}
 	}
 

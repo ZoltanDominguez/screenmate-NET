@@ -3,22 +3,12 @@ using System.Drawing;
 
 namespace ScreenMateNET
 {
-	enum ScreenMateStateEnum
+	public interface ISMEventSender
 	{
-		Idle,
-		RunLeft,
-		RinRight,
-		Bored,
-		Warm,
-		Cold
-	}
-
-	interface ISMEventSender
-	{
-		public Bitmap ScreenMateBitmap{ get; }
-		public ScreenMateStateEnum State { get; }
+		public String TileSetFilePath { get; }
+		public ScreenMateStateID StateID { get; }
 		public bool IsActive { get; }
 
-		public event Action ActiveStateChanged; // Handle
+		public event Action<ScreenMateStateID> ActiveStateChanged; // Handle
 	}
 }

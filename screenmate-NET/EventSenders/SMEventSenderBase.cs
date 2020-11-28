@@ -11,38 +11,52 @@ namespace ScreenMateNET
 		/// This function is started in a separate Thread.
 		/// </summary>
 
-		//protected Bitmap bitmap;
-		public ScreenMateStateEnum State{ get; protected set; }
+		//ScreenMateStateID stateID;
+		public ScreenMateStateID StateID
+		{ get; private set; }
 
-		public event Action ActiveStateChanged;
+		protected event Action<ScreenMateStateID> activeStateChanged;
+		//public event Action ActiveStateChanged;
 
 		private object lockObj = new Object();
-
 		Thread thread;
 
-		protected const String filename = "";
+		public virtual bool IsActive { get; protected set; }
 
-		public Bitmap ScreenMateBitmap { get; private set; }
+		public string TileSetFilePath { get; set; }
 
-		public bool IsActive { get; protected set; }
-
-		public SMEventSenderBase()
+		public SMEventSenderBase(ScreenMateStateID stateID)
 		{
-			ReadFromBitmapFile(filename);
+			StateID = stateID;
+			TileSetFilePath = LocalSettings.Instance.StateSettings[stateID].FilePath;
 			thread = new Thread(EventListenerFunction);
+		}
+
+		event Action<ScreenMateStateID> ISMEventSender.ActiveStateChanged
+		{
+			add
+			{
+				lock (lockObj)
+				{
+					activeStateChanged += value;
+				}
+			}
+
+			remove
+			{
+				lock (lockObj)
+				{
+					activeStateChanged -= value;
+				}
+			}
 		}
 
 		protected abstract void EventListenerFunction();
 
-		protected void ReadFromBitmapFile(String filename)
-		{
-			ScreenMateBitmap = new Bitmap(1, 2); // TODO impl.
-		}
-
 		protected void OnActiveStateChanged()
 		{
-			if (ActiveStateChanged != null)
-				ActiveStateChanged();
+			if (activeStateChanged != null)
+				activeStateChanged.Invoke(StateID);
 		}
 
 		//protected abstract EventListenerFunction();
