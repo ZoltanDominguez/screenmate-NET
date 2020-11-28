@@ -8,12 +8,14 @@ using System.Text;
 using System.Timers;
 
 
-enum Season
+enum SMSpriteState
 {
-	Spring,
-	Summer,
-	Autumn,
-	Winter
+	Idle,
+	Run,
+	Jump,
+	Walk,
+	Dead,
+	OnFire
 }
 
 namespace ScreenMateNET
@@ -33,7 +35,7 @@ namespace ScreenMateNET
 		Bitmap currentBitmap;
 		int framecounter = 0;
 		int epsilon = 20; // 20 pixel distance is considered equal
-		int speed = 5;
+		int speed = 3;
 
 
 		ScreenMateStateID currentState = ScreenMateStateID.Idle;
@@ -76,7 +78,7 @@ namespace ScreenMateNET
 
 		private void setupTimers()
 		{
-			fpsTimer = new Timer(140);
+			fpsTimer = new Timer(80);
 			fpsTimer.AutoReset = true;
 			fpsTimer.Enabled = true;
 			fpsTimer.Elapsed += OnFpsTimerTick;
@@ -107,12 +109,26 @@ namespace ScreenMateNET
 
 		private void OnFpsTimerTick(object sender, ElapsedEventArgs e)
 		{
-			if (currentState == ScreenMateStateID.CursorChasing) MoveTowardMouse();
-			else if (currentState == ScreenMateStateID.Bored) ;
-			else
-				currentBitmap = this.bitMapForStates[currentState][framecounter % 3];
+			switch (currentState)
+			{
+				case ScreenMateStateID.CursorChasing:
+					MoveTowardMouse();
+					break;
+				case ScreenMateStateID.Bored:
+					break;
+				case ScreenMateStateID.WarmCPU:
+					break;
+				case ScreenMateStateID.Cold:
+					break;
+				case ScreenMateStateID.SittingOnTopOfWindow:
+					break;
+				case ScreenMateStateID.Idle:
+					currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
+					break;
+				default:
+					break;
+			}
 			framecounter++;
-
 			DrawNeededEvent.Invoke();
 		}
 
@@ -128,15 +144,15 @@ namespace ScreenMateNET
 			if (CurrentLocation.Y + epsilon < mousePosition.Y) nextLocation.Y = currentLocation.Y + speed;
 			if (CurrentLocation.Y - epsilon > mousePosition.Y) nextLocation.Y = currentLocation.Y - speed;
 
-			if(currentLocation.X < mousePosition.X)
-				currentBitmap = this.bitMapForStates[currentState][framecounter % 3];
+			Bitmap ResultBitmap = this.bitMapForStates[ScreenMateStateID.CursorChasing][framecounter % 8];
+			if (currentLocation.X < mousePosition.X)
+				currentBitmap = ResultBitmap;
 			else
 			{
-				Bitmap mirrored = (Bitmap)bitMapForStates[currentState][framecounter % 3].Clone(); //Cloning
+				Bitmap mirrored = (Bitmap)ResultBitmap.Clone(); //Cloning
 				//Mirroring
 				mirrored.RotateFlip(RotateFlipType.RotateNoneFlipX);
 				currentBitmap = mirrored;
-
 			}
 		}
 
@@ -203,7 +219,6 @@ namespace ScreenMateNET
 		private void LoadBitmap(ScreenMateStateID id)
 		{
 			string folderPath = LocalSettings.Instance.StateSettings[id].FilePath;
-
 			DirectoryInfo folder = new DirectoryInfo(folderPath);
 			FileInfo[] images = folder.GetFiles();
 			List<Bitmap> bitmapsForState = new List<Bitmap>();
