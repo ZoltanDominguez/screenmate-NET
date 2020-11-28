@@ -70,6 +70,9 @@ namespace ScreenMateNET
 		{
 			LoadBitmap(ScreenMateStateID.Idle);
 			LoadBitmap(ScreenMateStateID.CursorChasing);
+			LoadBitmap(ScreenMateStateID.Bored);
+			LoadBitmap(ScreenMateStateID.SittingOnTopOfWindow);
+
 		}
 
 		private void setupTimers()
