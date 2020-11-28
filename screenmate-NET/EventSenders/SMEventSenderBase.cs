@@ -30,6 +30,7 @@ namespace ScreenMateNET
 			StateID = stateID;
 			TileSetFilePath = LocalSettings.Instance.StateSettings[stateID].FilePath;
 			thread = new Thread(EventListenerFunction);
+			thread.Start();
 		}
 
 		event Action<ScreenMateStateID> ISMEventSender.ActiveStateChanged
