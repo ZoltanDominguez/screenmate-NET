@@ -28,6 +28,7 @@ namespace ScreenMateNET
 		public event Action DrawNeededEvent;
 		private Timer fpsTimer;
 		private Timer stateChangeTimer;
+		List<Bitmap> bitmaps;
 
 
 		Dictionary<ScreenMateStateID, List<Bitmap>> bitMapForStates;
@@ -118,6 +119,40 @@ namespace ScreenMateNET
 		{
 			stateIsActiveMap[eventID] = isActive;
 			// ActivePolicy hívás? Akkor kell bele egy cooldown!
+		}
+
+		private void BitmapLoad(String filename)
+		{
+			Image image = Image.FromFile(filename);
+			Size size = new Size(12, 8);
+
+			int xMax = image.Width;
+			int yMax = image.Height;
+			int tileWidth = xMax / size.Width;
+			int tileHeight = yMax / size.Height;
+
+			// if (!Directory.Exists(outputPath)) { Directory.CreateDirectory(outputPath); }
+
+			for (int x = 0; x < size.Width; x++)
+			{
+				for (int y = 0; y < size.Height; y++)
+				{
+					// string outputFileName = Path.Combine(outputPath, string.Format("{0}_{1}.jpg", x, y));
+
+					Rectangle tileBounds = new Rectangle(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
+					Bitmap target = new Bitmap(tileWidth, tileHeight);
+
+					using (Graphics graphics = Graphics.FromImage(target))
+					{
+						graphics.DrawImage(
+							image,
+							new Rectangle(0, 0, tileWidth, tileHeight),
+							tileBounds,
+							GraphicsUnit.Pixel);
+					}
+					bitmaps.Add(target);
+				}
+			}
 		}
 
 	}
