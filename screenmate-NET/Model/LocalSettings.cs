@@ -19,13 +19,23 @@ namespace ScreenMateNET
 		{
 			StateSettings = new Dictionary<ScreenMateStateID, StateSetting>();
 			// Configból a fileneveket és azonosítókat hozzá és hogy aktív-e
-			StateSetting stateSetting = new StateSetting(@"..\..\..\..\res\run", true);
+			StateSetting stateSetting = new StateSetting(@"..\..\..\..\res\walk", true);
 			StateSettings[ScreenMateStateID.CursorChasing] = stateSetting;
 
 			StateSetting stateSetting2 = new StateSetting(@"..\..\..\..\res\idle", true);
 			StateSettings[ScreenMateStateID.Idle] = stateSetting2;
 
-		}
+            StateSetting stateSetting3 = new StateSetting(@"..\..\..\..\res\jump", true);
+            StateSettings[ScreenMateStateID.Bored] = stateSetting3;
+
+			StateSetting stateSetting4 = new StateSetting(@"..\..\..\..\res\dead", true);
+			StateSettings[ScreenMateStateID.SittingOnTopOfWindow] = stateSetting4;
+
+			// TODO: upload "warm" images into /res/warm folder
+            //StateSetting stateSetting5 = new StateSetting(@"..\..\..\..\res\warm", true);
+            //StateSettings[ScreenMateStateID.WarmCPU] = stateSetting5;
+
+        }
 
 		public static LocalSettings Instance
 		{
