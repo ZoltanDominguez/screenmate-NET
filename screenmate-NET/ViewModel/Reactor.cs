@@ -13,6 +13,11 @@ namespace ScreenMateNET
 
 		public Reactor()
 		{
+			initEventSenders();
+		}
+
+		private void initEventSenders()
+		{
 			// Eseményküldők létrehozása, nyílvántartása Dict-ben.
 			EventSenders = new Dictionary<ScreenMateStateID, ISMEventSender>();
 
@@ -34,7 +39,8 @@ namespace ScreenMateNET
 
 		private void AddEventSenderToDict( ISMEventSender eventSender)
 		{
-			EventSenders.Add(eventSender.StateID, eventSender);
+			if (LocalSettings.Instance.StateSettings[eventSender.StateID].IsActivated)
+				EventSenders.Add(eventSender.StateID, eventSender);
 		}
 	}
 
