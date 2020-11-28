@@ -2,8 +2,10 @@
 
 namespace ScreenMateNET
 {
-  interface ISettings
-  {
-    Dictionary<ScreenMateStateID, StateSetting> StateSettings { get; set; }
-  }
+	interface ISettings
+	{
+		public Dictionary<ScreenMateStateID, StateSetting> StateSettings { get; }
+
+		public void ChangeSettings(ScreenMateStateID id, StateSetting stateSetting);
+	}
 }
