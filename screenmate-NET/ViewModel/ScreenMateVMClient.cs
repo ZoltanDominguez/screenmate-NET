@@ -52,7 +52,6 @@ namespace ScreenMateNET
 		/// </summary>
 		private ScreenMateVMClient()
 		{
-
 			bitMapForStates = new Dictionary<ScreenMateStateID, List<Bitmap>>();
 			stateIsActiveMap = new Dictionary<ScreenMateStateID, bool>();
 
@@ -108,9 +107,10 @@ namespace ScreenMateNET
 
 		private void OnFpsTimerTick(object sender, ElapsedEventArgs e)
 		{
-			if(currentState == ScreenMateStateID.CursorChasing) MoveTowardMouse();
-
-			currentBitmap = this.bitMapForStates[currentState][framecounter%3];
+			if (currentState == ScreenMateStateID.CursorChasing) MoveTowardMouse();
+			else if (currentState == ScreenMateStateID.Bored) ;
+			else
+				currentBitmap = this.bitMapForStates[currentState][framecounter % 3];
 			framecounter++;
 
 			DrawNeededEvent.Invoke();
@@ -127,6 +127,17 @@ namespace ScreenMateNET
 			if (CurrentLocation.X - epsilon > mousePosition.X) nextLocation.X = currentLocation.X - speed;
 			if (CurrentLocation.Y + epsilon < mousePosition.Y) nextLocation.Y = currentLocation.Y + speed;
 			if (CurrentLocation.Y - epsilon > mousePosition.Y) nextLocation.Y = currentLocation.Y - speed;
+
+			if(currentLocation.X < mousePosition.X)
+				currentBitmap = this.bitMapForStates[currentState][framecounter % 3];
+			else
+			{
+				Bitmap mirrored = (Bitmap)bitMapForStates[currentState][framecounter % 3].Clone(); //Cloning
+				//Mirroring
+				mirrored.RotateFlip(RotateFlipType.RotateNoneFlipX);
+				currentBitmap = mirrored;
+
+			}
 		}
 
 		/// <summary>
@@ -150,7 +161,6 @@ namespace ScreenMateNET
 		{
 			Trace.WriteLine("Policy called. Current State is: " + currentState.ToString());
 			printMap();
-			stateIsActiveMap[ScreenMateStateID.Bored] = false;
 			bool noneIsActive = true;
 			foreach (ScreenMateStateID id in stateIsActiveMap.Keys)
 			{
@@ -169,6 +179,9 @@ namespace ScreenMateNET
 			if(noneIsActive) currentState = ScreenMateStateID.Idle; // Idle if no active was found
 		}
 
+		/// <summary>
+		/// Debug function
+		/// </summary>
 		void printMap()
 		{
 			Trace.WriteLine("\n");
