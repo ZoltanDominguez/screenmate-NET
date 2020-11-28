@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScreenMateNET.EventSenders;
+using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
@@ -22,7 +23,7 @@ namespace ScreenMateNET
 			EventSenders = new Dictionary<ScreenMateStateID, ISMEventSender>();
 
 			// Instantiate and add EventSenders to Dictionary
-			AddEventSenderToDict(new SMCpuWatcher());
+			AddEventSenderToDict(new SMCursorChasing());
 
 			// Subscribe GeneralLocalEventHandler to each EventSender's event
 			foreach (ISMEventSender eventSender in EventSenders.Values)

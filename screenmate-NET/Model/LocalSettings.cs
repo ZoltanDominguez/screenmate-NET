@@ -22,6 +22,9 @@ namespace ScreenMateNET
 			StateSetting stateSetting = new StateSetting(@"C:\Users\T480s\source\repos\screenmate-NET\res\tileset.png", true);
 			StateSettings[ScreenMateStateID.CursorChasing] = stateSetting;
 
+			StateSetting stateSetting2 = new StateSetting(@"C:\Users\T480s\source\repos\screenmate-NET\res\tileset.png", true);
+			StateSettings[ScreenMateStateID.Idle] = stateSetting2;
+
 		}
 
 		public static LocalSettings Instance

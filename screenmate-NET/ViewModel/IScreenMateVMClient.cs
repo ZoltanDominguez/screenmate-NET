@@ -7,5 +7,8 @@ namespace ScreenMateNET
 	{
 		event Action DrawNeededEvent;
 		public Bitmap getNextTileset();
+		public Point CurrentLocation { get; set; }
+		public Point NextLocation { get; set; }
+
 	}
 }

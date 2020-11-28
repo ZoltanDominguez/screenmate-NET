@@ -25,7 +25,8 @@ namespace ScreenMateNET
 			screenMateForm.FormBorderStyle = FormBorderStyle.None;
 			screenMateForm.Bounds = Screen.PrimaryScreen.Bounds;
 			screenMateForm.TopMost = true;
-
+			//screenMateForm
+			
 			Application.Run(screenMateForm);
 		}
 	}

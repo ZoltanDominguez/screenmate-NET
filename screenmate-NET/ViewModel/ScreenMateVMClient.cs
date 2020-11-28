@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Timers;
+
 
 enum Season
 {
@@ -22,14 +25,20 @@ namespace ScreenMateNET
 
 		private static ScreenMateVMClient instance = null;
 
+		private Point currentLocation, nextLocation;
+		public Point CurrentLocation { get => currentLocation; set => currentLocation = value; }
+		public Point NextLocation { get => nextLocation; set => nextLocation = value; }
 
 		Bitmap currentBitmap;
-		ScreenMateStateID currentState;
+		int framecounter = 0;
+		int epsilon = 20; // 20 pixel distance is considered equal
+		int speed = 5;
+
+
+		ScreenMateStateID currentState = ScreenMateStateID.Idle;
 		public event Action DrawNeededEvent;
 		private Timer fpsTimer;
 		private Timer stateChangeTimer;
-		List<Bitmap> bitmaps;
-
 
 		Dictionary<ScreenMateStateID, List<Bitmap>> bitMapForStates;
 		// need to keep the information here
@@ -42,23 +51,34 @@ namespace ScreenMateNET
 		/// </summary>
 		private ScreenMateVMClient()
 		{
-			setupTimers();
 
 			bitMapForStates = new Dictionary<ScreenMateStateID, List<Bitmap>>();
 			stateIsActiveMap = new Dictionary<ScreenMateStateID, bool>();
 
 			reactor = new Reactor();
+			this.LoadAllBitmap();
 			reactor.EventReceivedEvent += EventReceivedEventHandler;
+
+			CurrentLocation = new Point(100, 100); // Setup starting location
+			NextLocation = new Point(100, 100); // Setup starting location
+
+			setupTimers();
+		}
+
+		private void LoadAllBitmap()
+		{
+			LoadBitmap(ScreenMateStateID.Idle);
+			LoadBitmap(ScreenMateStateID.CursorChasing);
 		}
 
 		private void setupTimers()
 		{
-			fpsTimer = new Timer(33);
+			fpsTimer = new Timer(140);
 			fpsTimer.AutoReset = true;
 			fpsTimer.Enabled = true;
 			fpsTimer.Elapsed += OnFpsTimerTick;
 
-			stateChangeTimer = new Timer(2000);
+			stateChangeTimer = new Timer(1000);
 			stateChangeTimer.AutoReset = true;
 			stateChangeTimer.Enabled = true;
 			stateChangeTimer.Elapsed += OnStateChangeTimerTick;
@@ -82,8 +102,29 @@ namespace ScreenMateNET
 		/// </summary>
 		public Bitmap getNextTileset() => currentBitmap;
 
-		private void OnFpsTimerTick(object sender, ElapsedEventArgs e) => DrawNeededEvent.Invoke();
-		
+		private void OnFpsTimerTick(object sender, ElapsedEventArgs e)
+		{
+			if(currentState == ScreenMateStateID.CursorChasing) MoveTowardMouse();
+
+			currentBitmap = this.bitMapForStates[currentState][framecounter%3];
+			framecounter++;
+
+			DrawNeededEvent.Invoke();
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		private void MoveTowardMouse()
+		{
+			currentLocation = nextLocation;
+			Point mousePosition = System.Windows.Forms.Control.MousePosition;
+			if (CurrentLocation.X + epsilon < mousePosition.X) nextLocation.X = currentLocation.X + speed;
+			if (CurrentLocation.X - epsilon > mousePosition.X) nextLocation.X = currentLocation.X - speed;
+			if (CurrentLocation.Y + epsilon < mousePosition.Y) nextLocation.Y = currentLocation.Y + speed;
+			if (CurrentLocation.Y - epsilon > mousePosition.Y) nextLocation.Y = currentLocation.Y - speed;
+		}
+
 		/// <summary>
 		/// Check if change on currentState is needed or not based on the policy implementation
 		/// </summary>
@@ -103,27 +144,48 @@ namespace ScreenMateNET
 		/// </summary>
 		private void currentStateChangePolicy_FirstFound()
 		{
+			Trace.WriteLine("Policy called. Current State is: " + currentState.ToString());
+			printMap();
+			stateIsActiveMap[ScreenMateStateID.Bored] = false;
+			bool noneIsActive = true;
 			foreach (ScreenMateStateID id in stateIsActiveMap.Keys)
 			{
 				bool stateIsActive = stateIsActiveMap[id];
-				if (stateIsActive && id != currentState)
+				if (stateIsActive)
 				{
-					currentState = id;
-					return;
+					noneIsActive = false;
+					Trace.WriteLine("Policy CHANGE! ");
+					if(id != currentState)
+					{
+						currentState = id;
+						return;
+					}
 				}
+			}
+			if(noneIsActive) currentState = ScreenMateStateID.Idle; // Idle if no active was found
+		}
+
+		void printMap()
+		{
+			Trace.WriteLine("\n");
+			foreach (ScreenMateStateID id in stateIsActiveMap.Keys)
+			{
+				Trace.WriteLine("ID: " + id.ToString() + " State: " + stateIsActiveMap[id].ToString());
 			}
 		}
 
 
 		public void EventReceivedEventHandler(ScreenMateStateID eventID, bool isActive)
 		{
+			Trace.WriteLine("Event Received in VM. Event ID: " + eventID.ToString() + "  state: " + isActive.ToString());
+
 			stateIsActiveMap[eventID] = isActive;
 			// ActivePolicy hívás? Akkor kell bele egy cooldown!
 		}
 
-		private void BitmapLoad(String filename)
+		private void LoadBitmap(ScreenMateStateID id)
 		{
-			Image image = Image.FromFile(filename);
+			Image image = Image.FromFile(LocalSettings.Instance.StateSettings[id].FilePath);
 			Size size = new Size(12, 8);
 
 			int xMax = image.Width;
@@ -132,27 +194,23 @@ namespace ScreenMateNET
 			int tileHeight = yMax / size.Height;
 
 			// if (!Directory.Exists(outputPath)) { Directory.CreateDirectory(outputPath); }
-
-			for (int x = 0; x < size.Width; x++)
+			List<Bitmap> bitmapsForState = new List<Bitmap>();
+			int y = 0; // ezen variálni kell, ha mindent ebből a fájlból akarunk beolvasni.
+			for (int x = 0; x < xMax; x+=tileWidth)
 			{
-				for (int y = 0; y < size.Height; y++)
+				Rectangle tileBounds = new Rectangle(x, y, tileWidth, tileHeight);
+				Bitmap target = new Bitmap(tileWidth, tileHeight);
+				using (Graphics graphics = Graphics.FromImage(target))
 				{
-					// string outputFileName = Path.Combine(outputPath, string.Format("{0}_{1}.jpg", x, y));
-
-					Rectangle tileBounds = new Rectangle(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
-					Bitmap target = new Bitmap(tileWidth, tileHeight);
-
-					using (Graphics graphics = Graphics.FromImage(target))
-					{
-						graphics.DrawImage(
-							image,
-							new Rectangle(0, 0, tileWidth, tileHeight),
-							tileBounds,
-							GraphicsUnit.Pixel);
-					}
-					bitmaps.Add(target);
+					graphics.DrawImage(
+						image,
+						new Rectangle(0, 0, tileWidth, tileHeight),
+						tileBounds,
+						GraphicsUnit.Pixel);
 				}
+				bitmapsForState.Add(target);
 			}
+			this.bitMapForStates[id] = bitmapsForState;
 		}
 
 	}
