@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Timers;
@@ -185,33 +186,20 @@ namespace ScreenMateNET
 
 		private void LoadBitmap(ScreenMateStateID id)
 		{
-			Image image = Image.FromFile(LocalSettings.Instance.StateSettings[id].FilePath);
-			Size size = new Size(12, 8);
+			string folderPath = LocalSettings.Instance.StateSettings[id].FilePath;
 
-			int xMax = image.Width;
-			int yMax = image.Height;
-			int tileWidth = xMax / size.Width;
-			int tileHeight = yMax / size.Height;
-
-			// if (!Directory.Exists(outputPath)) { Directory.CreateDirectory(outputPath); }
+			DirectoryInfo folder = new DirectoryInfo(folderPath);
+			FileInfo[] images = folder.GetFiles();
 			List<Bitmap> bitmapsForState = new List<Bitmap>();
-			int y = 0; // ezen variálni kell, ha mindent ebből a fájlból akarunk beolvasni.
-			for (int x = 0; x < xMax; x+=tileWidth)
+			for (int i = 0; i < images.Length; i++)
 			{
-				Rectangle tileBounds = new Rectangle(x, y, tileWidth, tileHeight);
-				Bitmap target = new Bitmap(tileWidth, tileHeight);
-				using (Graphics graphics = Graphics.FromImage(target))
-				{
-					graphics.DrawImage(
-						image,
-						new Rectangle(0, 0, tileWidth, tileHeight),
-						tileBounds,
-						GraphicsUnit.Pixel);
-				}
+				Bitmap sourceImage = new Bitmap(String.Format(@"{0}/{1}", folderPath, images[i].Name));
+				Bitmap target = new Bitmap(sourceImage, new Size(sourceImage.Width / 8, sourceImage.Height / 8));
+
 				bitmapsForState.Add(target);
 			}
-			this.bitMapForStates[id] = bitmapsForState;
-		}
+			bitMapForStates[id] = bitmapsForState;
+        }
 
 	}
 }

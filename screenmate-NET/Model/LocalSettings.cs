@@ -19,10 +19,10 @@ namespace ScreenMateNET
 		{
 			StateSettings = new Dictionary<ScreenMateStateID, StateSetting>();
 			// Configból a fileneveket és azonosítókat hozzá és hogy aktív-e
-			StateSetting stateSetting = new StateSetting(@"C:\Users\T480s\source\repos\screenmate-NET\res\tileset.png", true);
+			StateSetting stateSetting = new StateSetting(@"..\..\..\..\res\run", true);
 			StateSettings[ScreenMateStateID.CursorChasing] = stateSetting;
 
-			StateSetting stateSetting2 = new StateSetting(@"C:\Users\T480s\source\repos\screenmate-NET\res\tileset.png", true);
+			StateSetting stateSetting2 = new StateSetting(@"..\..\..\..\res\idle", true);
 			StateSettings[ScreenMateStateID.Idle] = stateSetting2;
 
 		}
