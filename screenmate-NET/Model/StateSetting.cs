@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 
-namespace ScreenMateNET
+namespace ScreenMateNET.Model
 {
-	class StateSetting
+	public class StateSetting
 	{
 		public String FilePath { get; set; }
 		public bool IsActivated { get; set; }
@@ -16,6 +19,5 @@ namespace ScreenMateNET
 			FilePath = filePath;
 			IsActivated = isActivated;
 		}
-
 	}
 }

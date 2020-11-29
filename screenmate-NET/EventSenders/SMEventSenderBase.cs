@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScreenMateNET.Model;
+using System;
 using System.Drawing;
 using System.Threading;
 

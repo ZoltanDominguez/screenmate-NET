@@ -3,28 +3,23 @@ using Newtonsoft.Json.Linq;
 using ScreenMateNET.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace ScreenMateNET
+namespace ScreenMateNET.Model
 {
-	class LocalSettings : ISettings
+	public class LocalSettings : ISettings
 	{
 		// Singleton pattern
-		private static LocalSettings instance = null;
+		public static LocalSettings instance = null;
 		private int maxSpeed;
 		private int stamina;
 
-		public int CPUPercentLimit { get; set; }
-		public int MemoryPercentLimit { get; set; }
-		public int WaitingToBoredInSec { get; set; }
-		public bool IsBoringNeeded { get; set; }
-		public bool IsCursorChasing { get; set; }
-
-
-		public string configFilePath = "config.json";
-		SettingsSerializable SettingsSerializable;
+		public string configFilePath = AppDomain.CurrentDomain.BaseDirectory + "config.json";
+		SettingsSerializable settings;
+		public SettingsSerializable Settings { get => settings; private set => settings = value; }
 
 		public Dictionary<ScreenMateStateID, StateSetting> StateSettings { get; private set; }
 
@@ -32,39 +27,45 @@ namespace ScreenMateNET
 
 		private LocalSettings()
 		{
-			StateSettings = new Dictionary<ScreenMateStateID, StateSetting>();
+			initSettingsFromJSON();
 
+			StateSettings = new Dictionary<ScreenMateStateID, StateSetting>();
+			// Info from Settings
+
+			// IDLE state always needed as default
+			StateSettings[ScreenMateStateID.Idle] = new StateSetting(
+			String.Format(@"{0}", Settings.IdlePath),
+			true);
+
+			StateSettings[ScreenMateStateID.CursorChasing] = new StateSetting(
+				String.Format(@"{0}", Settings.CursorChasingPath),
+				Settings.IsCursorChasing);
+
+			StateSettings[ScreenMateStateID.Bored] = new StateSetting(
+				String.Format(@"{0}", Settings.BoredPath),
+				Settings.IsBoringNeeded);
+
+			StateSettings[ScreenMateStateID.SittingOnTopOfWindow] = new StateSetting(
+				String.Format(@"{0}",Settings.GoTopOfWindowPath),
+				Settings.IsSittingOnTopOfWindow);
+
+			StateSettings[ScreenMateStateID.WarmCPU] = new StateSetting(
+				String.Format(@"{0}", Settings.WarmPath),
+				Settings.IsWatchingCPU);
+		}
+
+		private void initSettingsFromJSON()
+		{
 			try
 			{
 				ReadConfigFromJSON(configFilePath);
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("A CONFIG fájl beolvasása közben hiba történt. : " + e.Message);
-				throw;
+				Trace.WriteLine("A CONFIG fájl beolvasása közben hiba történt. : " + e.Message);
+				Settings = new SettingsSerializable(); // Using default constructor then
+				Settings.SaveConfigToJSON(configFilePath);
 			}
-
-			// Configból a fileneveket és azonosítókat hozzá és hogy aktív-e
-			StateSetting stateSetting = new StateSetting(String.Format(@"{0}", SettingsSerializable.cursorChasingPath), true);
-			StateSettings[ScreenMateStateID.CursorChasing] = stateSetting;
-
-			StateSetting stateSetting2 = new StateSetting(String.Format(@"{0}", SettingsSerializable.idlePath), true);
-			StateSettings[ScreenMateStateID.Idle] = stateSetting2;
-
-            StateSetting stateSetting3 = new StateSetting(String.Format(@"{0}", SettingsSerializable.boredPath), true);
-			StateSettings[ScreenMateStateID.Bored] = stateSetting3;
-
-			StateSetting stateSetting4 = new StateSetting(String.Format(@"{0}", SettingsSerializable.goTopOfWindowPath), true);
-			StateSettings[ScreenMateStateID.SittingOnTopOfWindow] = stateSetting4;
-
-			StateSetting stateSetting5 = new StateSetting(String.Format(@"{0}", SettingsSerializable.warmPath), true);
-			StateSettings[ScreenMateStateID.WarmCPU] = stateSetting5;
-
-			CPUPercentLimit = SettingsSerializable.cpuPercentLimit;
-			MemoryPercentLimit = SettingsSerializable.memoryPercentLimit;
-			WaitingToBoredInSec = SettingsSerializable.waitingToBoredInSec;
-			IsBoringNeeded = SettingsSerializable.isBoringNeeded;
-			IsCursorChasing = SettingsSerializable.isCursorChasing;
 		}
 
 		public static LocalSettings Instance
@@ -77,9 +78,12 @@ namespace ScreenMateNET
 			}
 		}
 
-		public int MaxSpeed { get => maxSpeed; set => maxSpeed = value; }
-		public int Stamina { get => stamina; set => stamina = value; }
 
+		/// <summary>
+		/// Feature will be added in the future, to notify classes for changing settings dynamically
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="stateSetting"></param>
 		public void ChangeSettings(ScreenMateStateID id, StateSetting stateSetting)
 		{
 			this.StateSettings[id].FilePath = stateSetting.FilePath;
@@ -88,10 +92,14 @@ namespace ScreenMateNET
 			SettingsChanged.Invoke();
 		}
 
-		public void ReadConfigFromJSON(string configFilePath, bool reverseOrder = false)
+		public void ReadConfigFromJSON(string configFilePath)
 		{
-			SettingsSerializable = new SettingsSerializable();
-			if (File.Exists(configFilePath)) SettingsSerializable = SettingsSerializable.Load(configFilePath, reverseOrder);
+			Settings = SettingsSerializable.Load(configFilePath, false);
+		}
+
+		public void SaveStatePermanent()
+		{
+			Settings.SaveConfigToJSON(configFilePath);
 		}
 	}
 }

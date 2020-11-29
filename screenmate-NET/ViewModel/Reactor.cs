@@ -1,4 +1,5 @@
 ﻿using ScreenMateNET.EventSenders;
+using ScreenMateNET.Model;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;

@@ -10,7 +10,6 @@ namespace ScreenMateNET
 		CursorChasing,
 		Bored,
 		WarmCPU,
-		Cold,
 		SittingOnTopOfWindow
 	}
 }

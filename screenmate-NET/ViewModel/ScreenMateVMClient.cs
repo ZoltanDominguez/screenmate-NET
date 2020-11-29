@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScreenMateNET.Model;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -125,8 +126,6 @@ namespace ScreenMateNET
 					break;
 				case ScreenMateStateID.WarmCPU:
 					WarmCPUAnimation();
-					break;
-				case ScreenMateStateID.Cold:
 					break;
 				case ScreenMateStateID.SittingOnTopOfWindow:
 					break;

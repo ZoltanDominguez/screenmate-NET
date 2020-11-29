@@ -1,14 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using ScreenMateNET.Model;
+using System.Collections.Generic;
 
-namespace ScreenMateNET
+namespace ScreenMateNET.Model
 {
 	interface ISettings
 	{
 		public Dictionary<ScreenMateStateID, StateSetting> StateSettings { get; }
-
-		public int MaxSpeed { get; set; }
-		public int Stamina { get; set; }
-
+		public SettingsSerializable Settings { get; }
 		public void ChangeSettings(ScreenMateStateID id, StateSetting stateSetting);
 	}
 }

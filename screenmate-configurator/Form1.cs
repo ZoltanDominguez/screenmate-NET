@@ -1,4 +1,5 @@
-﻿using ScreenMateNET.Model;
+﻿using ScreenMateNET;
+using ScreenMateNET.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,76 +15,70 @@ namespace ScreenMateConfigurator
 {
 	public partial class Form1 : Form
 	{
-		private string configFilePath = @"..\..\..\..\screenmate-NET\bin\Debug\netcoreapp3.1\config.json";
 		private Dictionary<int, string> folderPaths;
-		SettingsSerializable settingsSerializable;
 		public Form1()
 		{
-			settingsSerializable = new SettingsSerializable();
-			if (File.Exists(configFilePath))
-			{
-				settingsSerializable = settingsSerializable.Load(configFilePath, false);
-			}
-				// TODO: path-ok betöltése
-			if (folderPaths == null)
-            {
-				folderPaths = new Dictionary<int, string>();
-            }
-			folderPaths.Add(0, settingsSerializable.idlePath);
-			folderPaths.Add(1, settingsSerializable.cursorChasingPath);
-			folderPaths.Add(2, settingsSerializable.boredPath);
-			folderPaths.Add(3, settingsSerializable.goTopOfWindowPath);
-			folderPaths.Add(4, settingsSerializable.warmPath);
-			// folderPaths.Add(5, settingsSerializable.cursorReachedPath);
-			
 			InitializeComponent();
+
 		}
 
-        private void button1_Click(object sender, EventArgs e)
-        {
+		private void button1_Click(object sender, EventArgs e)
+		{
 			DialogResult result = folderBrowserDialog1.ShowDialog();
 			if (result == DialogResult.OK)
 			{
 				if (folderPaths.ContainsKey(comboBox1.SelectedIndex))
-                {
+				{
 					folderPaths[comboBox1.SelectedIndex] = folderBrowserDialog1.SelectedPath;
 				}
 				else
-                {
+				{
 					folderPaths.Add(comboBox1.SelectedIndex, folderBrowserDialog1.SelectedPath);
-                }
+				}
 				textBox1.Text = folderBrowserDialog1.SelectedPath;
 			}
 		}
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
+		private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+		{
 			textBox1.Text = folderPaths.ContainsKey(comboBox1.SelectedIndex) ? folderPaths[comboBox1.SelectedIndex] : "";
 		}
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-			// TODO: értékek betöltése
-			numericUpDown1.Value = settingsSerializable.cpuPercentLimit;
-			numericUpDown2.Value = settingsSerializable.memoryPercentLimit;
-			numericUpDown3.Value = settingsSerializable.waitingToBoredInSec;
-			checkBox1.CheckState = settingsSerializable.isBoringNeeded ? CheckState.Checked : CheckState.Unchecked;
-			checkBox2.CheckState = settingsSerializable.isCursorChasing ? CheckState.Checked : CheckState.Unchecked;
+		private void Form1_Load(object sender, EventArgs e)
+		{
+			// Értékek betöltése a form-ra
+			numericUpDown1.Value = LocalSettings.Instance.Settings.CpuPercentLimit;
+			numericUpDown2.Value = LocalSettings.Instance.Settings.MemoryPercentLimit;
+			numericUpDown3.Value = LocalSettings.Instance.Settings.WaitingToBoredInSec;
+			checkBox1.CheckState = LocalSettings.Instance.Settings.IsBoringNeeded ? CheckState.Checked : CheckState.Unchecked;
+			checkBox2.CheckState = LocalSettings.Instance.Settings.IsCursorChasing ? CheckState.Checked : CheckState.Unchecked;
+
+			Dictionary<ScreenMateStateID, StateSetting> settings = LocalSettings.Instance.StateSettings;
+			int index = 0;
+			folderPaths = new Dictionary<int, string>();
+			foreach (ScreenMateStateID id in settings.Keys)
+			{
+				folderPaths.Add(index, settings[id].FilePath);
+				this.comboBox1.Items.Add(id.ToString());
+				index++;
+			}
 		}
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-			settingsSerializable.idlePath = folderPaths[0];
-			settingsSerializable.cursorChasingPath = folderPaths[1];
-			settingsSerializable.boredPath = folderPaths[2];
-			settingsSerializable.goTopOfWindowPath = folderPaths[3];
-			settingsSerializable.warmPath = folderPaths[4];
-			settingsSerializable.cpuPercentLimit = (int)numericUpDown1.Value;
-			settingsSerializable.memoryPercentLimit = (int)numericUpDown2.Value;
-			settingsSerializable.waitingToBoredInSec = (int)numericUpDown2.Value;
-			settingsSerializable.isBoringNeeded = checkBox1.Checked;
-			settingsSerializable.isCursorChasing = checkBox2.Checked;
-			settingsSerializable.SaveConfigToJSON(configFilePath);
+		private void button2_Click(object sender, EventArgs e)
+		{
+			LocalSettings.Instance.Settings.IdlePath = folderPaths[0];
+			LocalSettings.Instance.Settings.CursorChasingPath = folderPaths[1];
+			LocalSettings.Instance.Settings.BoredPath = folderPaths[2];
+			LocalSettings.Instance.Settings.GoTopOfWindowPath = folderPaths[3];
+			LocalSettings.Instance.Settings.WarmPath = folderPaths[4];
+			LocalSettings.Instance.Settings.CpuPercentLimit = (int)numericUpDown1.Value;
+			LocalSettings.Instance.Settings.MemoryPercentLimit = (int)numericUpDown2.Value;
+			LocalSettings.Instance.Settings.WaitingToBoredInSec = (int)numericUpDown3.Value;
+			LocalSettings.Instance.Settings.IsBoringNeeded = checkBox1.Checked;
+			LocalSettings.Instance.Settings.IsCursorChasing = checkBox2.Checked;
+
+			LocalSettings.Instance.SaveStatePermanent();
 		}
+
 	}
 }
