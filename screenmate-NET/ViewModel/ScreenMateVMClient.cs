@@ -33,6 +33,8 @@ namespace ScreenMateNET
 		public Point CurrentLocation { get => currentLocation; set => currentLocation = value; }
 		public Point NextLocation { get => nextLocation; set => nextLocation = value; }
 
+		bool wasAlreadyHappy = false;
+
 		Bitmap currentBitmap;
 		int framecounter = 0;
 		int epsilon = 20; // 20 pixel distance is considered equal
@@ -130,13 +132,20 @@ namespace ScreenMateNET
 				case ScreenMateStateID.SittingOnTopOfWindow:
 					break;
 				case ScreenMateStateID.Idle:
+					IdleCPUAnimation();
+					break;
 				default:
 					//currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
-					WarmCPUAnimation();
+					IdleCPUAnimation();
 					break;
 			}
 			framecounter++;
 			DrawNeededEvent.Invoke();
+		}
+
+		private void IdleCPUAnimation()
+		{
+			currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
 		}
 
 		private void WarmCPUAnimation()
@@ -151,10 +160,23 @@ namespace ScreenMateNET
 		{
 			currentLocation = nextLocation;
 			Point mousePosition = System.Windows.Forms.Control.MousePosition;
+			if (Math.Abs(CurrentLocation.X - mousePosition.X) < epsilon && Math.Abs(CurrentLocation.Y - mousePosition.Y) < epsilon)
+            {
+				if (wasAlreadyHappy)
+				{
+					currentState = ScreenMateStateID.Idle;
+					return;
+				}
+				currentState = ScreenMateStateID.WarmCPU;
+				wasAlreadyHappy = true;
+				return;
+            }
+			wasAlreadyHappy = false;
 			if (CurrentLocation.X + epsilon < mousePosition.X) nextLocation.X = currentLocation.X + speed;
 			if (CurrentLocation.X - epsilon > mousePosition.X) nextLocation.X = currentLocation.X - speed;
 			if (CurrentLocation.Y + epsilon < mousePosition.Y) nextLocation.Y = currentLocation.Y + speed;
 			if (CurrentLocation.Y - epsilon > mousePosition.Y) nextLocation.Y = currentLocation.Y - speed;
+			
 
 			Bitmap ResultBitmap = this.bitMapForStates[ScreenMateStateID.CursorChasing][framecounter % 8];
 			if (currentLocation.X < mousePosition.X)
