@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ScreenMateNET.Model
 {
-	class SettingsSerializzable
+	class SettingsSerializable
 	{
 	}
 }

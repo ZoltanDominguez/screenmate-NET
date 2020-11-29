@@ -12,4 +12,8 @@
     <None Remove="screenmate-NET-TEST\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
 </Project>
