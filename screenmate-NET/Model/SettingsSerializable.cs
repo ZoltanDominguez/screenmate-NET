@@ -59,10 +59,6 @@ namespace ScreenMateNET.Model
 		public void SaveConfigToJSON(string configFilePath)
 		{
 			JArray configs = new JArray();
-			//if (File.Exists(configFilePath))
-			//{
-			//	configs = JArray.Parse(File.ReadAllText(configFilePath));
-			//}
 			configs.Add(JObject.FromObject(this));
 			File.WriteAllText(configFilePath, configs.ToString());
 		}

@@ -64,7 +64,7 @@ namespace ScreenMateNET.Model
 			{
 				Trace.WriteLine("A CONFIG fájl beolvasása közben hiba történt. : " + e.Message);
 				Settings = new SettingsSerializable(); // Using default constructor then
-				Settings.SaveConfigToJSON(configFilePath);
+				this.SaveStatePermanent();
 			}
 		}
 
