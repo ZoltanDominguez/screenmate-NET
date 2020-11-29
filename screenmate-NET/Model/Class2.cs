@@ -12,7 +12,7 @@ namespace ScreenMateNET
 	class LocalSettings2 : ISettings
 	{
 		// Singleton pattern
-		private static LocalSettings instance = null;
+		private static LocalSettings2 instance = null;
 		private int maxSpeed;
 		private int stamina;
 

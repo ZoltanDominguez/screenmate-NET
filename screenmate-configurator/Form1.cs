@@ -54,5 +54,10 @@ namespace ScreenMateConfigurator
 			numericUpDown2.Value = 100;
 			numericUpDown3.Value = 10;
 		}
-	}
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+			
+        }
+    }
 }
