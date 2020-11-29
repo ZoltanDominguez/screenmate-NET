@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Timers;
 
@@ -19,7 +20,7 @@ enum SMSpriteState
 	OnFire
 }
 
-namespace ScreenMateNET
+namespace ScreenMateNET.ViewModel
 {
 	class ScreenMateVMClient : IScreenMateVMClient
 	{
@@ -41,7 +42,7 @@ namespace ScreenMateNET
 		int speed = 3;
 
 
-		ScreenMateStateID currentState = ScreenMateStateID.WarmCPU;
+		ScreenMateStateID currentState = ScreenMateStateID.Idle;
 		public event Action DrawNeededEvent;
 		private Timer fpsTimer;
 		private Timer stateChangeTimer;
@@ -65,8 +66,12 @@ namespace ScreenMateNET
 			reactor.EventReceivedEvent += EventReceivedEventHandler;
 
 			CurrentLocation = new Point(100, 100); // Setup starting location
-			NextLocation = new Point(100, 100); // Setup starting location
+			NextLocation = new Point(100, 100); // Can be used for interpolation
 
+
+			// Test
+			//IntPtr hWnd = WndSearcher.SearchForWindow("IEFrame", "pinvoke.net: EnumWindows");
+			WndSearcher.GetAllWindows();
 			setupTimers();
 		}
 
@@ -122,28 +127,59 @@ namespace ScreenMateNET
 			switch (currentState)
 			{
 				case ScreenMateStateID.CursorChasing:
-					MoveTowardMouse();
+					MoveTowardMouseAnimation();
 					break;
 				case ScreenMateStateID.Bored:
+					BoredAnimation();
 					break;
 				case ScreenMateStateID.WarmCPU:
 					WarmCPUAnimation();
 					break;
 				case ScreenMateStateID.SittingOnTopOfWindow:
+					SitOnTopOfWindowAnimation();
 					break;
 				case ScreenMateStateID.Idle:
 					IdleCPUAnimation();
 					break;
 				default:
 					//currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
+<<<<<<< Updated upstream
 					IdleCPUAnimation();
+=======
+					IdleAnimation();
+>>>>>>> Stashed changes
 					break;
 			}
 			framecounter++;
 			DrawNeededEvent.Invoke();
 		}
 
+<<<<<<< Updated upstream
 		private void IdleCPUAnimation()
+=======
+		private void BoredAnimation()
+		{
+			throw new NotImplementedException();
+		}
+
+		[return: MarshalAs(UnmanagedType.Bool)]
+		[DllImport("user32.dll", SetLastError = true)]
+		private static extern bool GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
+
+		private void SitOnTopOfWindowAnimation()
+		{
+
+
+			WINDOWINFO info = new WINDOWINFO();
+			info.cbSize = (uint) Marshal.SizeOf(info);
+
+			IntPtr hWnd = WndSearcher.SearchForWindow("IEFrame", "pinvoke.net: EnumWindows");
+
+			GetWindowInfo(hWnd, ref info);
+		}
+
+		private void IdleAnimation()
+>>>>>>> Stashed changes
 		{
 			currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
 		}
@@ -156,7 +192,7 @@ namespace ScreenMateNET
 		/// <summary>
 		/// 
 		/// </summary>
-		private void MoveTowardMouse()
+		private void MoveTowardMouseAnimation()
 		{
 			currentLocation = nextLocation;
 			Point mousePosition = System.Windows.Forms.Control.MousePosition;
