@@ -115,7 +115,6 @@ namespace ScreenMateConfigurator
             "Alap",
             "Futás",
             "Unatkozás",
-            "Célba érés",
             "Ablak tetejére ülés",
             "Izzadás"});
             this.comboBox1.Location = new System.Drawing.Point(217, 52);

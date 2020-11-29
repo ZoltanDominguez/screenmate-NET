@@ -16,6 +16,13 @@ namespace ScreenMateNET
 		private int maxSpeed;
 		private int stamina;
 
+		public int CPUPercentLimit { get; set; }
+		public int MemoryPercentLimit { get; set; }
+		public int WaitingToBoredInSec { get; set; }
+		public bool IsBoringNeeded { get; set; }
+		public bool IsCursorChasing { get; set; }
+
+
 		public string configFilePath = "config.json";
 		SettingsSerializable SettingsSerializable;
 
@@ -29,7 +36,7 @@ namespace ScreenMateNET
 
 			try
 			{
-				ReadConfigFromJSON();
+				ReadConfigFromJSON(configFilePath);
 			}
 			catch (Exception e)
 			{
@@ -47,15 +54,17 @@ namespace ScreenMateNET
             StateSetting stateSetting3 = new StateSetting(String.Format(@"{0}", SettingsSerializable.boredPath), true);
 			StateSettings[ScreenMateStateID.Bored] = stateSetting3;
 
-			StateSetting stateSetting4 = new StateSetting(String.Format(@"{0}", SettingsSerializable.GoTopOfWindowPath), true);
+			StateSetting stateSetting4 = new StateSetting(String.Format(@"{0}", SettingsSerializable.goTopOfWindowPath), true);
 			StateSettings[ScreenMateStateID.SittingOnTopOfWindow] = stateSetting4;
 
-			StateSetting stateSetting5 = new StateSetting(@"..\..\..\..\res\jumpwithfire", true);
+			StateSetting stateSetting5 = new StateSetting(String.Format(@"{0}", SettingsSerializable.warmPath), true);
 			StateSettings[ScreenMateStateID.WarmCPU] = stateSetting5;
 
-			// TODO: upload "warm" images into /res/warm folder
-			//StateSetting stateSetting5 = new StateSetting(@"..\..\..\..\res\warm", true);
-			//StateSettings[ScreenMateStateID.WarmCPU] = stateSetting5;
+			CPUPercentLimit = SettingsSerializable.cpuPercentLimit;
+			MemoryPercentLimit = SettingsSerializable.memoryPercentLimit;
+			WaitingToBoredInSec = SettingsSerializable.waitingToBoredInSec;
+			IsBoringNeeded = SettingsSerializable.isBoringNeeded;
+			IsCursorChasing = SettingsSerializable.isCursorChasing;
 		}
 
 		public static LocalSettings Instance
@@ -79,45 +88,10 @@ namespace ScreenMateNET
 			SettingsChanged.Invoke();
 		}
 
-		/// <summary>
-		/// Reads Config from specified config.json file, or creates one if not exists
-		/// </summary>
-		public void ReadConfigFromJSON(bool reverseOrder = false)
+		public void ReadConfigFromJSON(string configFilePath, bool reverseOrder = false)
 		{
-			if (File.Exists(configFilePath)) SettingsSerializable = Load(reverseOrder);
-			else SettingsSerializable = new SettingsSerializable(); // Create New config with default values
-		}
-
-		public string GetConfigAsJSON() => JsonConvert.SerializeObject(this.SettingsSerializable);
-
-		private SettingsSerializable Load(bool reverseOrder = false)
-		{
-			string json = File.ReadAllText(configFilePath);
-			JToken token;
-			if (reverseOrder)
-				token = JArray.Parse(json).LastOrDefault(item => (int)(item["Count"]) != 0);
-			else
-				token = JArray.Parse(json).FirstOrDefault(item => (int)(item.Count()) != 0);
-			token = token ?? JArray.Parse(json).FirstOrDefault();
-			SettingsSerializable config = token != null ? token.ToObject<SettingsSerializable>() : new SettingsSerializable();
-			return config;
-		}
-
-		public void ResetConfigFile()
-		{
-			JArray configs = new JArray();
-			File.WriteAllText(configFilePath, configs.ToString());
-		}
-
-		public void SaveConfigToJSON(SettingsSerializable toSave = null)
-		{
-			JArray configs = new JArray();
-			if (File.Exists(configFilePath))
-			{
-				configs = JArray.Parse(File.ReadAllText(configFilePath));
-			}
-			configs.Add(JObject.FromObject(toSave ?? SettingsSerializable));
-			File.WriteAllText(configFilePath, configs.ToString());
+			SettingsSerializable = new SettingsSerializable();
+			if (File.Exists(configFilePath)) SettingsSerializable = SettingsSerializable.Load(configFilePath, reverseOrder);
 		}
 	}
 }
