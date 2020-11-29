@@ -38,7 +38,7 @@ namespace ScreenMateNET
 		int speed = 3;
 
 
-		ScreenMateStateID currentState = ScreenMateStateID.Idle;
+		ScreenMateStateID currentState = ScreenMateStateID.WarmCPU;
 		public event Action DrawNeededEvent;
 		private Timer fpsTimer;
 		private Timer stateChangeTimer;
@@ -73,7 +73,14 @@ namespace ScreenMateNET
 			LoadBitmap(ScreenMateStateID.CursorChasing);
 			LoadBitmap(ScreenMateStateID.Bored);
 			LoadBitmap(ScreenMateStateID.SittingOnTopOfWindow);
+			LoadBitmap(ScreenMateStateID.WarmCPU);
 
+			// WarmCPU
+			/*bitMapForStates[ScreenMateStateID.WarmCPU] = SpriteCombiner.CreateBitmap(
+				bitMapForStates[ScreenMateStateID.Bored],
+				new Bitmap(@"C:\Users\Zoltán\source\repos\screenmate-NET\res\fire\fire.jpg"),
+				new Point(100, 0)
+				);*/
 		}
 
 		private void setupTimers()
@@ -117,19 +124,25 @@ namespace ScreenMateNET
 				case ScreenMateStateID.Bored:
 					break;
 				case ScreenMateStateID.WarmCPU:
+					WarmCPUAnimation();
 					break;
 				case ScreenMateStateID.Cold:
 					break;
 				case ScreenMateStateID.SittingOnTopOfWindow:
 					break;
 				case ScreenMateStateID.Idle:
-					currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
-					break;
 				default:
+					//currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
+					WarmCPUAnimation();
 					break;
 			}
 			framecounter++;
 			DrawNeededEvent.Invoke();
+		}
+
+		private void WarmCPUAnimation()
+		{
+			currentBitmap = this.bitMapForStates[ScreenMateStateID.WarmCPU][framecounter % 12];
 		}
 
 		/// <summary>
@@ -226,6 +239,7 @@ namespace ScreenMateNET
 			{
 				Bitmap sourceImage = new Bitmap(String.Format(@"{0}/{1}", folderPath, images[i].Name));
 				Bitmap target = new Bitmap(sourceImage, new Size(sourceImage.Width / 8, sourceImage.Height / 8));
+				//Bitmap target = new Bitmap(sourceImage, new Size(sourceImage.Width, sourceImage.Height));
 
 				bitmapsForState.Add(target);
 			}

@@ -31,11 +31,13 @@ namespace ScreenMateNET
 			StateSetting stateSetting4 = new StateSetting(@"..\..\..\..\res\dead", true);
 			StateSettings[ScreenMateStateID.SittingOnTopOfWindow] = stateSetting4;
 
+			StateSetting stateSetting5 = new StateSetting(@"..\..\..\..\res\jumpwithfire", true);
+			StateSettings[ScreenMateStateID.WarmCPU] = stateSetting5;
 			// TODO: upload "warm" images into /res/warm folder
-            //StateSetting stateSetting5 = new StateSetting(@"..\..\..\..\res\warm", true);
-            //StateSettings[ScreenMateStateID.WarmCPU] = stateSetting5;
+			//StateSetting stateSetting5 = new StateSetting(@"..\..\..\..\res\warm", true);
+			//StateSettings[ScreenMateStateID.WarmCPU] = stateSetting5;
 
-        }
+		}
 
 		public static LocalSettings Instance
 		{
