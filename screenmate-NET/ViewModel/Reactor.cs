@@ -24,7 +24,9 @@ namespace ScreenMateNET
 			EventSenders = new Dictionary<ScreenMateStateID, ISMEventSender>();
 
 			// Instantiate and add EventSenders to Dictionary
-			AddEventSenderToDict(new SMCursorChasing());
+			RegisterEventSenderToDict(new SMCursorChasing());
+			RegisterEventSenderToDict(new SMCpuWatcher());
+
 
 			// Subscribe GeneralLocalEventHandler to each EventSender's event
 			foreach (ISMEventSender eventSender in EventSenders.Values)
@@ -39,7 +41,7 @@ namespace ScreenMateNET
 				EventReceivedEvent.Invoke(stateID, EventSenders[stateID].IsActive);
 		}
 
-		private void AddEventSenderToDict( ISMEventSender eventSender)
+		private void RegisterEventSenderToDict( ISMEventSender eventSender)
 		{
 			if (LocalSettings.Instance.StateSettings[eventSender.StateID].IsActivated)
 				EventSenders.Add(eventSender.StateID, eventSender);
