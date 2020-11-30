@@ -73,11 +73,13 @@ namespace ScreenMateConfigurator
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
+            this.checkBox2.Checked = true;
+            this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox2.Location = new System.Drawing.Point(52, 162);
             this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(168, 19);
+            this.checkBox2.Size = new System.Drawing.Size(109, 19);
             this.checkBox2.TabIndex = 3;
-            this.checkBox2.Text = "Ne kövesse az egérmutatót";
+            this.checkBox2.Text = "Kurzor követése";
             this.checkBox2.UseVisualStyleBackColor = true;
             // 
             // label2
@@ -111,7 +113,6 @@ namespace ScreenMateConfigurator
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
-
             this.comboBox1.Location = new System.Drawing.Point(217, 52);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(117, 23);
@@ -175,12 +176,13 @@ namespace ScreenMateConfigurator
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(676, 105);
+            this.button2.BackColor = System.Drawing.Color.Aqua;
+            this.button2.Location = new System.Drawing.Point(541, 157);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(117, 24);
+            this.button2.Size = new System.Drawing.Size(217, 45);
             this.button2.TabIndex = 9;
-            this.button2.Text = "Limitek mentése";
-            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Text = "Módosítások mentése";
+            this.button2.UseVisualStyleBackColor = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // Form1
