@@ -22,7 +22,19 @@ namespace ScreenMateNET
 		private object lockObj = new Object();
 		Thread thread;
 
-		public virtual bool IsActive { get; protected set; }
+		private bool isActive;
+
+		public virtual bool IsActive 
+		{ 
+			get => isActive;
+			protected set {
+				if (isActive != value)
+				{
+					isActive = value;
+					OnActiveStateChanged();
+				}
+			} 
+		}
 
 		public string TileSetFilePath { get; set; }
 

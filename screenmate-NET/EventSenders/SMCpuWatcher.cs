@@ -15,7 +15,7 @@ namespace ScreenMateNET
 		int limit;
 		public SMCpuWatcher():base(ScreenMateStateID.WarmCPU)
 		{
-			limit = LocalSettings.instance.Settings.CpuPercentLimit;
+			limit = LocalSettings.Instance.Settings.CpuPercentLimit;
 		}
 
 		protected override void EventListenerFunction()
@@ -36,13 +36,13 @@ namespace ScreenMateNET
 
 				if (cpuPercent >= limit)
 				{
-					IsActive = true;
-					OnActiveStateChanged();
+					if (!IsActive)
+						IsActive = true;
 				}
 				else
 				{
-					IsActive = false;
-					OnActiveStateChanged();
+					if (IsActive)
+						IsActive = false;
 				}
 			}
 			

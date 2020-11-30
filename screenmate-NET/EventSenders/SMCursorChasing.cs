@@ -22,11 +22,8 @@ namespace ScreenMateNET.EventSenders
 
 				// Az egér pozícióját majd csak a form fogja tudni!
 				IsActive = true;
-				OnActiveStateChanged();
 				Thread.Sleep(10000); // 10 másodperc után elfárad, addig nem küld új eseményt
 				IsActive = false;
-				OnActiveStateChanged();
-
 			}
 		}
 	}
