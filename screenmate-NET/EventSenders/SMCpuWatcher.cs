@@ -15,7 +15,7 @@ namespace ScreenMateNET
 		int limit;
 		public SMCpuWatcher():base(ScreenMateStateID.WarmCPU)
 		{
-			limit = LocalSettings.Instance.Settings.CpuPercentLimit;
+			limit = LocalSettings.Instance.Settings.CpuPercentLimit; // You can debug it with -100
 		}
 
 		protected override void EventListenerFunction()
@@ -32,7 +32,6 @@ namespace ScreenMateNET
 				// ha itt el akar szállni valami invalidexceptionnel (cannot load counter name - invalid index), akkor admin módban kell futtatni a cmd-t, majd: 
 				// "C:\windows\SysWOW64> lodctr /r". Ha erre kapsz egy "Error: Unable to rebuild performance counter setting..."-et, akkor "C:\windows\SysWOW64> lodctr /r" lesz a megoldás.
 				float cpuPercent = cpuCounter.NextValue();
-
 
 				IsActive = (cpuPercent >= limit) ? true: false;
 			}

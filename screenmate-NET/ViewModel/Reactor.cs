@@ -26,6 +26,9 @@ namespace ScreenMateNET
 			// Instantiate and add EventSenders to Dictionary
 			RegisterEventSenderToDict(new SMCursorChasing());
 			RegisterEventSenderToDict(new SMCpuWatcher());
+			RegisterEventSenderToDict(new SMBored());
+			RegisterEventSenderToDict(new SMSitOnTopOfTheWindow());
+
 
 
 			// Subscribe GeneralLocalEventHandler to each EventSender's event
@@ -43,7 +46,7 @@ namespace ScreenMateNET
 
 		private void RegisterEventSenderToDict( ISMEventSender eventSender)
 		{
-			if (LocalSettings.Instance.StateSettings[eventSender.StateID].IsActivated)
+			if (LocalSettings.Instance.StateSettings[eventSender.StateID].IsEnabled)
 				EventSenders.Add(eventSender.StateID, eventSender);
 		}
 	}

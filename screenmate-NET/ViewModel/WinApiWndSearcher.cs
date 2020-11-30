@@ -39,7 +39,7 @@ namespace ScreenMateNET.ViewModel
                     {
                         RECT position = new RECT();
                         GetWindowRect(window.MainWindowHandle, out position);
-                        Trace.WriteLine(" - Title: " + window.MainWindowTitle + "Place: " + position.Location.ToString());
+                        Trace.WriteLine(" - Title: " + window.MainWindowTitle + " Place: " + position.Location.ToString());
                         return position.Location;
                     }
                 }

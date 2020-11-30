@@ -17,8 +17,9 @@ namespace ScreenMateNET.Model
 		private int maxSpeed;
 		private int stamina;
 
-		public string configFilePath = Environment.GetFolderPath(
-			Environment.SpecialFolder.LocalApplicationData) + "config.json";
+		public string configFilePath =
+		Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
+			"ScreenMate-NET-config.json");
 		SettingsSerializable settings;
 		public SettingsSerializable Settings { get => settings; private set => settings = value; }
 

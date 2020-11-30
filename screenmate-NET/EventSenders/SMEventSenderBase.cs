@@ -19,19 +19,31 @@ namespace ScreenMateNET
 		protected event Action<ScreenMateStateID> activeStateChanged;
 		//public event Action ActiveStateChanged;
 
-		private object lockObj = new Object();
+		private object lockObjAction = new Object();
 		Thread thread;
 
-		private bool isActive;
+		private object lockObjIsActive = new Object();
+
+		private bool isActive = false;
 
 		public virtual bool IsActive 
-		{ 
-			get => isActive;
-			protected set {
-				if (isActive != value)
+		{
+			get 
+			{
+				lock (lockObjIsActive)
 				{
-					isActive = value;
-					OnActiveStateChanged();
+					return isActive;
+				}
+			}
+			protected set
+			{
+				lock (lockObjIsActive)
+				{
+					if (isActive != value)
+					{
+						isActive = value;
+						OnActiveStateChanged();
+					}
 				}
 			} 
 		}
@@ -50,7 +62,7 @@ namespace ScreenMateNET
 		{
 			add
 			{
-				lock (lockObj)
+				lock (lockObjAction)
 				{
 					activeStateChanged += value;
 				}
@@ -58,7 +70,7 @@ namespace ScreenMateNET
 
 			remove
 			{
-				lock (lockObj)
+				lock (lockObjAction)
 				{
 					activeStateChanged -= value;
 				}

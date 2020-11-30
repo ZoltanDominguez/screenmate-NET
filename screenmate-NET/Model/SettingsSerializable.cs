@@ -12,7 +12,7 @@ namespace ScreenMateNET.Model
 	{
 		private string idlePath = @"..\..\..\..\res\idle";
 		private string cursorChasingPath = @"..\..\..\..\res\cursorchasing";
-		private string boredPath = @"..\..\..\..\res\dead";
+		private string boredPath = @"..\..\..\..\res\jump";
 
 		private string goTopOfWindowPath = @"..\..\..\..\res\sitontopofwindow";
 		private string warmPath = @"..\..\..\..\res\jumpwithfire";

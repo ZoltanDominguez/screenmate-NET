@@ -44,6 +44,8 @@ namespace ScreenMateNET.ViewModel
 
 
 		ScreenMateStateID currentState = ScreenMateStateID.Idle;
+		ScreenMateStateID previousState = ScreenMateStateID.Idle;
+
 		public event Action DrawNeededEvent;
 		private Timer fpsTimer;
 		private Timer stateChangeTimer;
@@ -119,7 +121,7 @@ namespace ScreenMateNET.ViewModel
 
 		private void OnFpsTimerTick(object sender, ElapsedEventArgs e)
 		{
-			/*switch (currentState)
+			switch (currentState)
 			{
 				case ScreenMateStateID.CursorChasing:
 					MoveTowardMouseAnimation();
@@ -134,22 +136,19 @@ namespace ScreenMateNET.ViewModel
 					SitOnTopOfWindowAnimation();
 					break;
 				case ScreenMateStateID.Idle:
-
 					IdleCPUAnimation();
 					break;
 				default:
-					//currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
-					IdleCPUAnimation();
+					SitOnTopOfWindowAnimation();
 					break;
-			}*/
-			SitOnTopOfWindowAnimation();
+			}
 			framecounter++;
 			DrawNeededEvent.Invoke();
 		}
 
 		private void IdleCPUAnimation()
 		{
-
+			currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
 		}
 
 		[return: MarshalAs(UnmanagedType.Bool)]
@@ -161,6 +160,9 @@ namespace ScreenMateNET.ViewModel
 
 		private void SitOnTopOfWindowAnimation()
 		{
+			if (previousState != ScreenMateStateID.SittingOnTopOfWindow)
+				laydownindex = 0;
+
 			if (CloseToDestination(topWindowDestination))
 			{
 				if (laydownindex < 8)
@@ -179,17 +181,12 @@ namespace ScreenMateNET.ViewModel
 
 		private void IdleAnimation()
 		{
-			double waitInFps = Math.Floor(LocalSettings.Instance.Settings.WaitingToBoredInSec * 1000 /fpsTimer.Interval);
-			// idleCounter = (currentState == ScreenMateStateID.Idle || currentState == ScreenMateStateID.Bored) ? idleCounter + 1 : 0;
-			if (idleCounter == waitInFps) sleepingTime = 0;
-			if (idleCounter >= waitInFps) currentState = ScreenMateStateID.Bored;
-            else currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
+            currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
 			idleCounter++;
 		}
 		private void BoredAnimation()
 		{
-			int offset = sleepingTime >= 4 ? 4 : 0;
-			currentBitmap = this.bitMapForStates[ScreenMateStateID.Bored][framecounter % 4 + offset];
+			currentBitmap = this.bitMapForStates[ScreenMateStateID.Bored][framecounter % 12];
 			sleepingTime++;
 		}
 
@@ -199,33 +196,71 @@ namespace ScreenMateNET.ViewModel
 			idleCounter = 0;
 		}
 
+		int runningStartTickStamp = 0;
+		int restingStartTickStamp = 0;
+		int restingTime = 0;
+		bool isRestingDuringRun = false;
+		bool juststartedRunning = true;
+		int restingIndex = 0;
 		/// <summary>
 		/// 
 		/// </summary>
 		private void MoveTowardMouseAnimation()
 		{
-			Point mousePosition = System.Windows.Forms.Control.MousePosition;
-			if (CloseToDestination(mousePosition))
+			if (isRestingDuringRun)
 			{
-				if (wasAlreadyHappy)
+				restingTime = LocalSettings.Instance.Settings.Stamina < 5000 ? (int)((5000 - LocalSettings.Instance.Settings.Stamina) / fpsTimer.Interval) : 0;
+				// true if tired
+				if (framecounter - restingStartTickStamp - restingTime <= 0)
 				{
-					currentState = ScreenMateStateID.Idle;
-					return;
+					if (restingIndex < 8)
+					{
+						Point mousePosition = System.Windows.Forms.Control.MousePosition;
+						currentBitmap = FaceToDestination(mousePosition, this.bitMapForStates[ScreenMateStateID.CursorChasing][restingIndex % 8]);
+						restingIndex++;
+					}
 				}
-				currentState = ScreenMateStateID.WarmCPU;
-				wasAlreadyHappy = true;
-				return;
-			}
-			wasAlreadyHappy = false;
-			MoveTowardDestination(mousePosition);
+				else
+				{
+					restingIndex = 0;
+					juststartedRunning = true;
+					isRestingDuringRun = false;
+					LocalSettings.Instance.Settings.Stamina += 1000;
+					//LocalSettings.Instance.SaveStatePermanent();
+				}
 
-			currentBitmap = FaceToDestination(mousePosition, this.bitMapForStates[ScreenMateStateID.CursorChasing][framecounter % 8]);
-			
-			
-			// LocalSettings.Instance.Settings.Stamina += 10;
+			}
+			else
+			{
+				if (juststartedRunning)
+					runningStartTickStamp = framecounter;
+				if (framecounter - runningStartTickStamp > (10000 / fpsTimer.Interval))
+				{
+					isRestingDuringRun = true; // Running for 10 sec
+					restingStartTickStamp = framecounter;
+				}
+				RunToCursor();
+				juststartedRunning = false;
+			}
 		}
 
+		private void RunToCursor()
+		{
+			Point mousePosition = System.Windows.Forms.Control.MousePosition;
+			MoveTowardDestination(mousePosition);
 
+			if (CloseToDestination(mousePosition))
+			{
+				// Jumping 0-11
+				currentBitmap = FaceToDestination(mousePosition, this.bitMapForStates[ScreenMateStateID.CursorChasing][8+(framecounter % 12)]);
+			}
+			else
+			{
+				// Running 12-19
+				currentBitmap = FaceToDestination(mousePosition, this.bitMapForStates[ScreenMateStateID.CursorChasing][20 + (framecounter % 8)]);
+			}
+			// LocalSettings.Instance.Settings.Stamina += 10;
+		}
 
 		private bool CloseToDestination(Point destination)
 		{
@@ -271,6 +306,7 @@ namespace ScreenMateNET.ViewModel
 		/// </summary>
 		private void OnStateChangeTimerTick(object sender, ElapsedEventArgs e)
 		{
+			previousState = currentState;
 			ActivePolicy();
 			
 			topWindowDestination = WndSearcher.Instance.GetCoordinatesOfTopWindow(); // now here, consider making him a separate timer
@@ -290,6 +326,9 @@ namespace ScreenMateNET.ViewModel
 		{
 			Trace.WriteLine("Policy called. Current State is: " + currentState.ToString());
 			printMap();
+			
+			// Give absolute priority to SittingOntop
+			// if (stateIsActiveMap[ScreenMateStateID.SittingOnTopOfWindow]) return;
 			bool noneIsActive = true;
 			lock (stateMapLock)
 			{
@@ -302,13 +341,17 @@ namespace ScreenMateNET.ViewModel
 						Trace.WriteLine("Policy CHANGE! ");
 						if (id != currentState)
 						{
-							currentState = id;
-							return;
+							// Dont wake it up if sleeping...
+							if (id != ScreenMateStateID.Bored || currentState != ScreenMateStateID.SittingOnTopOfWindow)
+							{
+								currentState = id;
+								return;
+							}
 						}
 					}
 				}
 			}
-			if(noneIsActive) currentState = ScreenMateStateID.Idle; // Idle if no active was found
+			if(noneIsActive) currentState = ScreenMateStateID.SittingOnTopOfWindow; // Idle if no active was found
 		}
 
 		/// <summary>

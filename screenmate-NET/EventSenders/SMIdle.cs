@@ -1,15 +1,14 @@
 ﻿using ScreenMateNET.Model;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Text;
 using System.Threading;
 
 namespace ScreenMateNET.EventSenders
 {
-	class SMCursorChasing : SMEventSenderBase
+	class SMIdle : SMEventSenderBase
 	{
-		public SMCursorChasing():base(ScreenMateStateID.CursorChasing)
+		public SMIdle():base(ScreenMateStateID.Idle)
 		{
 
 		}
@@ -17,15 +16,18 @@ namespace ScreenMateNET.EventSenders
 		{
 			while (true)
 			{
-				Thread.Sleep(5000);
-				if (DateTime.Now.Minute % 10 == 0)
+				if (DateTime.Now.Minute % 10 == 9)
 				{
 					IsActive = true;
+					Thread.Sleep(60000);
+					IsActive = false;
 				}
 				else
 				{
 					IsActive = false;
+					Thread.Sleep(5000);
 				}
+
 			}
 		}
 	}
