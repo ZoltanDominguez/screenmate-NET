@@ -34,16 +34,7 @@ namespace ScreenMateNET
 				float cpuPercent = cpuCounter.NextValue();
 
 
-				if (cpuPercent >= limit)
-				{
-					if (!IsActive)
-						IsActive = true;
-				}
-				else
-				{
-					if (IsActive)
-						IsActive = false;
-				}
+				IsActive = (cpuPercent >= limit) ? true: false;
 			}
 			
             
