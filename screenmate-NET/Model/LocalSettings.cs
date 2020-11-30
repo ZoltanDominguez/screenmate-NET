@@ -88,7 +88,7 @@ namespace ScreenMateNET.Model
 		public void ChangeSettings(ScreenMateStateID id, StateSetting stateSetting)
 		{
 			this.StateSettings[id].FilePath = stateSetting.FilePath;
-			this.StateSettings[id].IsActivated = stateSetting.IsActivated;
+			this.StateSettings[id].IsEnabled = stateSetting.IsEnabled;
 			// kimentés
 			SettingsChanged.Invoke();
 		}

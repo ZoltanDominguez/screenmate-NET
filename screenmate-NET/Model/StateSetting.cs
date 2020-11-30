@@ -10,14 +10,14 @@ namespace ScreenMateNET.Model
 	public class StateSetting
 	{
 		public String FilePath { get; set; }
-		public bool IsActivated { get; set; }
+		public bool IsEnabled { get; set; }
 
 		//public int AnimationTimeFrame{ get; set; } lehet kell int érték az animáció gyorsaságára?
 
-		public StateSetting(String filePath, bool isActivated)
+		public StateSetting(String filePath, bool isEnabled)
 		{
 			FilePath = filePath;
-			IsActivated = isActivated;
+			IsEnabled = isEnabled;
 		}
 	}
 }
