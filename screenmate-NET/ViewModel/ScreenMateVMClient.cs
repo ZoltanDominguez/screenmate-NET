@@ -165,7 +165,7 @@ namespace ScreenMateNET.ViewModel
 			{
 				if (laydownindex < 8)
 				{
-					currentBitmap = bitMapForStates[ScreenMateStateID.SittingOnTopOfWindow][8 + laydownindex];
+					currentBitmap = FaceToDestination(topWindowDestination, bitMapForStates[ScreenMateStateID.SittingOnTopOfWindow][8 + laydownindex]);
 					laydownindex++;
 				}
 			}
