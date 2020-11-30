@@ -38,8 +38,9 @@ namespace ScreenMateNET.ViewModel
 
 		Bitmap currentBitmap;
 		int framecounter = 0;
-		int epsilon = 20; // 20 pixel distance is considered equal
+		int epsilon;
 		int speed = 3;
+		private int charHeightOffset = 50;
 
 
 		ScreenMateStateID currentState = ScreenMateStateID.Idle;
@@ -50,8 +51,9 @@ namespace ScreenMateNET.ViewModel
 		private int sleepingTime = 0;
 
 		Dictionary<ScreenMateStateID, List<Bitmap>> bitMapForStates;
-		// need to keep the information here
+		// need to keep the information here in memory
 		Dictionary<ScreenMateStateID, bool> stateIsActiveMap;
+		private Object stateMapLock = new Object();
 
 		Reactor reactor;
 
@@ -60,6 +62,7 @@ namespace ScreenMateNET.ViewModel
 		/// </summary>
 		private ScreenMateVMClient()
 		{
+			epsilon = speed + 1; // it ensures it wont oscillate around it.
 			bitMapForStates = new Dictionary<ScreenMateStateID, List<Bitmap>>();
 			stateIsActiveMap = new Dictionary<ScreenMateStateID, bool>();
 
@@ -71,9 +74,6 @@ namespace ScreenMateNET.ViewModel
 			NextLocation = new Point(100, 100); // Can be used for interpolation
 
 
-			// Test
-			//IntPtr hWnd = WndSearcher.SearchForWindow("IEFrame", "pinvoke.net: EnumWindows");
-			WndSearcher.GetAllWindows();
 			setupTimers();
 		}
 
@@ -84,13 +84,6 @@ namespace ScreenMateNET.ViewModel
 			LoadBitmap(ScreenMateStateID.Bored);
 			LoadBitmap(ScreenMateStateID.SittingOnTopOfWindow);
 			LoadBitmap(ScreenMateStateID.WarmCPU);
-
-			// WarmCPU
-			/*bitMapForStates[ScreenMateStateID.WarmCPU] = SpriteCombiner.CreateBitmap(
-				bitMapForStates[ScreenMateStateID.Bored],
-				new Bitmap(@"C:\Users\Zoltán\source\repos\screenmate-NET\res\fire\fire.jpg"),
-				new Point(100, 0)
-				);*/
 		}
 
 		private void setupTimers()
@@ -126,7 +119,7 @@ namespace ScreenMateNET.ViewModel
 
 		private void OnFpsTimerTick(object sender, ElapsedEventArgs e)
 		{
-			switch (currentState)
+			/*switch (currentState)
 			{
 				case ScreenMateStateID.CursorChasing:
 					MoveTowardMouseAnimation();
@@ -146,43 +139,45 @@ namespace ScreenMateNET.ViewModel
 					break;
 				default:
 					//currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
-<<<<<<< Updated upstream
 					IdleCPUAnimation();
-=======
-					IdleAnimation();
->>>>>>> Stashed changes
 					break;
-			}
+			}*/
+			SitOnTopOfWindowAnimation();
 			framecounter++;
 			DrawNeededEvent.Invoke();
 		}
 
-<<<<<<< Updated upstream
 		private void IdleCPUAnimation()
-=======
-		private void BoredAnimation()
 		{
-			throw new NotImplementedException();
+
 		}
 
 		[return: MarshalAs(UnmanagedType.Bool)]
 		[DllImport("user32.dll", SetLastError = true)]
 		private static extern bool GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
 
+		Point topWindowDestination = new Point();
+		int laydownindex = 0;
+
 		private void SitOnTopOfWindowAnimation()
 		{
-
-
-			WINDOWINFO info = new WINDOWINFO();
-			info.cbSize = (uint) Marshal.SizeOf(info);
-
-			IntPtr hWnd = WndSearcher.SearchForWindow("IEFrame", "pinvoke.net: EnumWindows");
-
-			GetWindowInfo(hWnd, ref info);
+			if (CloseToDestination(topWindowDestination))
+			{
+				if (laydownindex < 8)
+				{
+					currentBitmap = bitMapForStates[ScreenMateStateID.SittingOnTopOfWindow][8 + laydownindex];
+					laydownindex++;
+				}
+			}
+			else
+			{
+				MoveTowardDestination(topWindowDestination);
+				currentBitmap = FaceToDestination(topWindowDestination, bitMapForStates[ScreenMateStateID.SittingOnTopOfWindow][framecounter % 8]);
+				laydownindex = 0;
+			}
 		}
 
 		private void IdleAnimation()
->>>>>>> Stashed changes
 		{
 			double waitInFps = Math.Floor(LocalSettings.instance.Settings.WaitingToBoredInSec * 1000 /fpsTimer.Interval);
 			// idleCounter = (currentState == ScreenMateStateID.Idle || currentState == ScreenMateStateID.Bored) ? idleCounter + 1 : 0;
@@ -209,10 +204,9 @@ namespace ScreenMateNET.ViewModel
 		/// </summary>
 		private void MoveTowardMouseAnimation()
 		{
-			currentLocation = nextLocation;
 			Point mousePosition = System.Windows.Forms.Control.MousePosition;
-			if (Math.Abs(CurrentLocation.X - mousePosition.X) < epsilon && Math.Abs(CurrentLocation.Y - mousePosition.Y) < epsilon)
-            {
+			if (CloseToDestination(mousePosition))
+			{
 				if (wasAlreadyHappy)
 				{
 					currentState = ScreenMateStateID.Idle;
@@ -221,34 +215,66 @@ namespace ScreenMateNET.ViewModel
 				currentState = ScreenMateStateID.WarmCPU;
 				wasAlreadyHappy = true;
 				return;
-            }
-			wasAlreadyHappy = false;
-			idleCounter = 0;
-			if (CurrentLocation.X + epsilon < mousePosition.X) nextLocation.X = currentLocation.X + speed;
-			if (CurrentLocation.X - epsilon > mousePosition.X) nextLocation.X = currentLocation.X - speed;
-			if (CurrentLocation.Y + epsilon < mousePosition.Y) nextLocation.Y = currentLocation.Y + speed;
-			if (CurrentLocation.Y - epsilon > mousePosition.Y) nextLocation.Y = currentLocation.Y - speed;
-			
-
-			Bitmap ResultBitmap = this.bitMapForStates[ScreenMateStateID.CursorChasing][framecounter % 8];
-			if (currentLocation.X < mousePosition.X)
-				currentBitmap = ResultBitmap;
-			else
-			{
-				Bitmap mirrored = (Bitmap)ResultBitmap.Clone(); //Cloning
-				//Mirroring
-				mirrored.RotateFlip(RotateFlipType.RotateNoneFlipX);
-				currentBitmap = mirrored;
 			}
-			LocalSettings.Instance.Settings.Stamina+=10;
+			wasAlreadyHappy = false;
+			MoveTowardDestination(mousePosition);
+
+			currentBitmap = FaceToDestination(mousePosition, this.bitMapForStates[ScreenMateStateID.CursorChasing][framecounter % 8]);
+			
+			
+			// LocalSettings.Instance.Settings.Stamina += 10;
 		}
 
+
+
+		private bool CloseToDestination(Point destination)
+		{
+			return (Math.Abs(CurrentLocation.X - destination.X) < epsilon) && (Math.Abs(CurrentLocation.Y - destination.Y) < epsilon);
+		}
+
+		private bool __CloseToDestination(Point destination)
+		{
+			return Math.Abs(CurrentLocation.X - destination.X) < epsilon && Math.Abs(CurrentLocation.Y - destination.Y) < epsilon;
+		}
+
+		private Bitmap FaceToDestination(Point destination, Bitmap bitmap)
+		{
+			if (currentLocation.X < destination.X)
+				return bitmap;
+			else
+			{
+				Bitmap mirrored = (Bitmap)bitmap.Clone(); //Cloning
+														  //Mirroring
+				mirrored.RotateFlip(RotateFlipType.RotateNoneFlipX);
+				return mirrored;
+			}
+		}
+
+		private void MoveTowardDestination(Point destination)
+		{
+			//currentLocation = nextLocation;
+			if (CurrentLocation.X < destination.X) currentLocation.X = currentLocation.X + speed;
+			if (CurrentLocation.X > destination.X) currentLocation.X = currentLocation.X - speed;
+			if (CurrentLocation.Y < destination.Y) currentLocation.Y = currentLocation.Y + speed;
+			if (CurrentLocation.Y > destination.Y) currentLocation.Y = currentLocation.Y - speed;
+		}
+		private void MoveTowardDestinationWithEpsilon(Point destination)
+		{
+			//currentLocation = nextLocation;
+			if (CurrentLocation.X + epsilon < destination.X) currentLocation.X = currentLocation.X + speed;
+			if (CurrentLocation.X - epsilon > destination.X) currentLocation.X = currentLocation.X - speed;
+			if (CurrentLocation.Y + epsilon < destination.Y) currentLocation.Y = currentLocation.Y + speed;
+			if (CurrentLocation.Y - epsilon > destination.Y) currentLocation.Y = currentLocation.Y - speed;
+		}
 		/// <summary>
 		/// Check if change on currentState is needed or not based on the policy implementation
 		/// </summary>
 		private void OnStateChangeTimerTick(object sender, ElapsedEventArgs e)
 		{
 			ActivePolicy();
+			
+			topWindowDestination = WndSearcher.GetCoordinatesOfTopWindow(); // now here, consider making him a separate timer
+			topWindowDestination.Y -= charHeightOffset; // character heightoffset
 		}
 
 		/// <summary>
@@ -265,17 +291,20 @@ namespace ScreenMateNET.ViewModel
 			Trace.WriteLine("Policy called. Current State is: " + currentState.ToString());
 			printMap();
 			bool noneIsActive = true;
-			foreach (ScreenMateStateID id in stateIsActiveMap.Keys)
+			lock (stateMapLock)
 			{
-				bool stateIsActive = stateIsActiveMap[id];
-				if (stateIsActive)
+				foreach (ScreenMateStateID id in stateIsActiveMap.Keys)
 				{
-					noneIsActive = false;
-					Trace.WriteLine("Policy CHANGE! ");
-					if(id != currentState)
+					bool stateIsActive = stateIsActiveMap[id];
+					if (stateIsActive)
 					{
-						currentState = id;
-						return;
+						noneIsActive = false;
+						Trace.WriteLine("Policy CHANGE! ");
+						if (id != currentState)
+						{
+							currentState = id;
+							return;
+						}
 					}
 				}
 			}
@@ -288,9 +317,12 @@ namespace ScreenMateNET.ViewModel
 		void printMap()
 		{
 			Trace.WriteLine("\n");
-			foreach (ScreenMateStateID id in stateIsActiveMap.Keys)
+			lock (stateMapLock)
 			{
-				Trace.WriteLine("ID: " + id.ToString() + " State: " + stateIsActiveMap[id].ToString());
+				foreach (ScreenMateStateID id in stateIsActiveMap.Keys)
+				{
+					Trace.WriteLine("ID: " + id.ToString() + " State: " + stateIsActiveMap[id].ToString());
+				}
 			}
 		}
 
@@ -299,7 +331,10 @@ namespace ScreenMateNET.ViewModel
 		{
 			Trace.WriteLine("Event Received in VM. Event ID: " + eventID.ToString() + "  state: " + isActive.ToString());
 
-			stateIsActiveMap[eventID] = isActive;
+			lock (stateMapLock)
+			{
+				stateIsActiveMap[eventID] = isActive;
+			}
 			// ActivePolicy hívás? Akkor kell bele egy cooldown!
 		}
 

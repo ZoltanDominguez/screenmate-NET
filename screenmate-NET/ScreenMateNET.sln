@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScreenMateNET", "ScreenMate
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "screenmate-NET-UnitTest", "..\screenmate-NET-TEST\screenmate-NET-UnitTest.csproj", "{9020D477-640E-4E74-99B6-828A3772B145}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScreenMateConfigurator", "..\screenmate-configurator\ScreenMateConfigurator.csproj", "{94A79282-EB30-485C-ADF2-6E9A649D7A50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScreenMateConfigurator", "..\screenmate-configurator\ScreenMateConfigurator.csproj", "{D4F89147-D23D-4BEE-B237-94851B5734E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{9020D477-640E-4E74-99B6-828A3772B145}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9020D477-640E-4E74-99B6-828A3772B145}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9020D477-640E-4E74-99B6-828A3772B145}.Release|Any CPU.Build.0 = Release|Any CPU
-		{94A79282-EB30-485C-ADF2-6E9A649D7A50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{94A79282-EB30-485C-ADF2-6E9A649D7A50}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{94A79282-EB30-485C-ADF2-6E9A649D7A50}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{94A79282-EB30-485C-ADF2-6E9A649D7A50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4F89147-D23D-4BEE-B237-94851B5734E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4F89147-D23D-4BEE-B237-94851B5734E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4F89147-D23D-4BEE-B237-94851B5734E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4F89147-D23D-4BEE-B237-94851B5734E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

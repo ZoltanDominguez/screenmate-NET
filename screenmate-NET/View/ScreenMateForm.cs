@@ -28,8 +28,8 @@ namespace ScreenMateNET
 		private void ScreenMateFormOnPaint(object sender, PaintEventArgs e)
 		{
 			Bitmap bitmap = screenMateVMClient.getNextTileset();
-			int width = 48;
-			int height = 72;
+			//int width = 48;
+			//int height = 72;
 			if (bitmap != null)
 			{
 				e.Graphics.DrawImage(bitmap, screenMateVMClient.CurrentLocation); 

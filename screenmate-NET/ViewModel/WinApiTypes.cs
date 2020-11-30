@@ -122,43 +122,5 @@ namespace ScreenMateNET.ViewModel
 
 
 
-        // 6.
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
-
-        private struct WINDOWPLACEMENT
-        {
-            public int length;
-            public uint flags;
-            public uint showCmd;
-            public System.Drawing.Point ptMinPosition;
-            public System.Drawing.Point ptMaxPosition;
-            public System.Drawing.Rectangle rcNormalPosition;
-        }
-
-        const uint SW_HIDE = 0;
-        const uint SW_MAXIMIZE = 3;
-        const uint SW_MINIMIZE = 6;
-        const uint SW_RESTORE = 9;
-        const uint SW_SHOW = 5;
-        const uint SW_SHOWMAXIMIZED = 3;
-        const uint SW_SHOWMINIMIZED = 2;
-        const uint SW_SHOWMINNOACTIVE = 7;
-        const uint SW_SHOWNA = 8;
-        const uint SW_SHOWNOACTIVATE = 4;
-        const uint SW_SHOWNORMAL = 1;
-
-...
-
-    private void GetPlacement()
-        {
-            WINDOWPLACEMENT placement = new WINDOWPLACEMENT();
-            placement.length = Marshal.SizeOf(placement);
-            GetWindowPlacement(this.Handle, ref placement);
-        }
-
-
-
     }
 }

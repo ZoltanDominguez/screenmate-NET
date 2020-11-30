@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -9,6 +10,33 @@ namespace ScreenMateNET.ViewModel
 {
     public class WndSearcher
     {
+        static Process lastWindow = new Process();
+        static Process previousWindow = new Process();
+        static ArrayList arrayList = new ArrayList();
+
+        //static List<String> validApps = new List<string> {"Microsoft Teams", "Visual Studio", "Google Chrome"};
+        static List<String> validApps = new List<string> { "Microsoft Teams", "Visual Studio" };
+
+        public static Point GetCoordinatesOfTopWindow()
+        {
+            foreach (Process window in Process.GetProcesses())
+            {
+                foreach (string validapp in validApps)
+                {
+                    if (window.MainWindowTitle.Contains(validapp))
+                    {
+                        RECT position = new RECT();
+                        GetWindowRect(window.MainWindowHandle, out position);
+                        Trace.WriteLine(" - Title: " + window.MainWindowTitle + "Place: " + position.Location.ToString());
+                        return position.Location;
+                    }
+                }
+                if (previousWindow == window) break;
+            }
+            return new Point();
+           
+        }
+
         public static IntPtr SearchForWindow(string wndclass, string title)
         {
             SearchData sd = new SearchData { Wndclass = wndclass, Title = title };
@@ -52,12 +80,6 @@ namespace ScreenMateNET.ViewModel
                 }
             }
             return true;
-        }
-
-        private class SearchData1
-        {
-            // You can put any dicks or Doms in here...
-            public IntPtr hWnd;
         }
         private class SearchData
         {
@@ -155,18 +177,27 @@ namespace ScreenMateNET.ViewModel
 
                 if (window.MainWindowHandle != IntPtr.Zero)
                 {
+
+
+                    // 6. Get the handle to a dialog
+                    IntPtr dlgHandle = GetWindow(window.MainWindowHandle, GetWindowType.GW_HWNDFIRST);
+
+
                     windowHandles.Add(window.MainWindowHandle);
-                    Trace.WriteLine("\n" +window.MainWindowHandle.ToString());
+                    //Trace.WriteLine("\n" +window.MainWindowHandle.ToString());
                     StringBuilder sb = new StringBuilder(1024);
-                    GetClassName(window.MainWindowHandle, sb, sb.Capacity);
+                    GetClassName(dlgHandle, sb, sb.Capacity);
 
                     String classname = sb.ToString();
 
                     sb = new StringBuilder(1024);
-                    GetWindowText(window.MainWindowHandle, sb, sb.Capacity);
+                    GetWindowText(dlgHandle, sb, sb.Capacity);
                     String title = sb.ToString();
 
-                    Trace.WriteLine("Class NAME: " + classname + " - Title: " + title + "Place:" + GetPlacement(window.MainWindowHandle));
+
+                    Trace.WriteLine("Handle: "+ window.MainWindowHandle.ToString() +" Class NAME: " + classname + " - Title: " + title + "Place:" + GetPlacement(window.MainWindowHandle));
+                    Trace.WriteLine(dlgHandle.ToString());
+
 
                 }
             }
@@ -205,9 +236,73 @@ namespace ScreenMateNET.ViewModel
             placement.length = Marshal.SizeOf(placement);
             GetWindowPlacement(handle, ref placement);
             //Trace.WriteLine(placement);
-            return placement.flags;
+            return placement.showCmd;
         }
 
 
+        // 6.
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr GetWindow(IntPtr hWnd, GetWindowType uCmd);
+
+        private enum GetWindowType : uint
+        {
+            /// <summary>
+            /// The retrieved handle identifies the window of the same type that is highest in the Z order.
+            /// <para/>
+            /// If the specified window is a topmost window, the handle identifies a topmost window.
+            /// If the specified window is a top-level window, the handle identifies a top-level window.
+            /// If the specified window is a child window, the handle identifies a sibling window.
+            /// </summary>
+            GW_HWNDFIRST = 0,
+            /// <summary>
+            /// The retrieved handle identifies the window of the same type that is lowest in the Z order.
+            /// <para />
+            /// If the specified window is a topmost window, the handle identifies a topmost window.
+            /// If the specified window is a top-level window, the handle identifies a top-level window.
+            /// If the specified window is a child window, the handle identifies a sibling window.
+            /// </summary>
+            GW_HWNDLAST = 1,
+            /// <summary>
+            /// The retrieved handle identifies the window below the specified window in the Z order.
+            /// <para />
+            /// If the specified window is a topmost window, the handle identifies a topmost window.
+            /// If the specified window is a top-level window, the handle identifies a top-level window.
+            /// If the specified window is a child window, the handle identifies a sibling window.
+            /// </summary>
+            GW_HWNDNEXT = 2,
+            /// <summary>
+            /// The retrieved handle identifies the window above the specified window in the Z order.
+            /// <para />
+            /// If the specified window is a topmost window, the handle identifies a topmost window.
+            /// If the specified window is a top-level window, the handle identifies a top-level window.
+            /// If the specified window is a child window, the handle identifies a sibling window.
+            /// </summary>
+            GW_HWNDPREV = 3,
+            /// <summary>
+            /// The retrieved handle identifies the specified window's owner window, if any.
+            /// </summary>
+            GW_OWNER = 4,
+            /// <summary>
+            /// The retrieved handle identifies the child window at the top of the Z order,
+            /// if the specified window is a parent window; otherwise, the retrieved handle is NULL.
+            /// The function examines only child windows of the specified window. It does not examine descendant windows.
+            /// </summary>
+            GW_CHILD = 5,
+            /// <summary>
+            /// The retrieved handle identifies the enabled popup window owned by the specified window (the
+            /// search uses the first such window found using GW_HWNDNEXT); otherwise, if there are no enabled
+            /// popup windows, the retrieved handle is that of the specified window.
+            /// </summary>
+            GW_ENABLEDPOPUP = 6
+        }
+
+        // 7.
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+
+        // 8.
+        [DllImport("user32.dll")]
+        public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
     }
 }
