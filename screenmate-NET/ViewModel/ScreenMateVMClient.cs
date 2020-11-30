@@ -179,7 +179,7 @@ namespace ScreenMateNET.ViewModel
 
 		private void IdleAnimation()
 		{
-			double waitInFps = Math.Floor(LocalSettings.instance.Settings.WaitingToBoredInSec * 1000 /fpsTimer.Interval);
+			double waitInFps = Math.Floor(LocalSettings.Instance.Settings.WaitingToBoredInSec * 1000 /fpsTimer.Interval);
 			// idleCounter = (currentState == ScreenMateStateID.Idle || currentState == ScreenMateStateID.Bored) ? idleCounter + 1 : 0;
 			if (idleCounter == waitInFps) sleepingTime = 0;
 			if (idleCounter >= waitInFps) currentState = ScreenMateStateID.Bored;
