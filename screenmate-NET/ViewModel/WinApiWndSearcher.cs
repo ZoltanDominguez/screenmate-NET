@@ -10,14 +10,26 @@ namespace ScreenMateNET.ViewModel
 {
     public class WndSearcher
     {
-        static Process lastWindow = new Process();
-        static Process previousWindow = new Process();
-        static ArrayList arrayList = new ArrayList();
+
+        private static WndSearcher instance = null;
+
+        Process previousWindow = new Process();
 
         //static List<String> validApps = new List<string> {"Microsoft Teams", "Visual Studio", "Google Chrome"};
-        static List<String> validApps = new List<string> { "Microsoft Teams", "Visual Studio" };
+        //List<String> validApps = new List<string> { "Microsoft Teams", "Visual Studio" };
+        List<String> validApps = new List<string> { "Microsoft Teams" };
 
-        public static Point GetCoordinatesOfTopWindow()
+        public static WndSearcher Instance
+        {
+            get
+            {
+                if (instance == null)
+                    instance = new WndSearcher();
+                return instance;
+            }
+        }
+
+        public Point GetCoordinatesOfTopWindow()
         {
             foreach (Process window in Process.GetProcesses())
             {
@@ -33,11 +45,11 @@ namespace ScreenMateNET.ViewModel
                 }
                 if (previousWindow == window) break;
             }
-            return new Point();
+            return new Point(650,50);
            
         }
 
-        public static IntPtr SearchForWindow(string wndclass, string title)
+        public IntPtr SearchForWindow(string wndclass, string title)
         {
             SearchData sd = new SearchData { Wndclass = wndclass, Title = title };
             //SearchData sd = new SearchData();
@@ -97,10 +109,10 @@ namespace ScreenMateNET.ViewModel
         private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, ref SearchData data);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
 
 

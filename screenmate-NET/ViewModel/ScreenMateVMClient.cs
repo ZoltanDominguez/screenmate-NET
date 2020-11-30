@@ -273,7 +273,7 @@ namespace ScreenMateNET.ViewModel
 		{
 			ActivePolicy();
 			
-			topWindowDestination = WndSearcher.GetCoordinatesOfTopWindow(); // now here, consider making him a separate timer
+			topWindowDestination = WndSearcher.Instance.GetCoordinatesOfTopWindow(); // now here, consider making him a separate timer
 			topWindowDestination.Y -= charHeightOffset; // character heightoffset
 		}
 
