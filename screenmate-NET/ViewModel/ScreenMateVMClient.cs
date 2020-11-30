@@ -46,6 +46,8 @@ namespace ScreenMateNET.ViewModel
 		public event Action DrawNeededEvent;
 		private Timer fpsTimer;
 		private Timer stateChangeTimer;
+		private int idleCounter = 0;
+		private int sleepingTime = 0;
 
 		Dictionary<ScreenMateStateID, List<Bitmap>> bitMapForStates;
 		// need to keep the information here
@@ -139,6 +141,7 @@ namespace ScreenMateNET.ViewModel
 					SitOnTopOfWindowAnimation();
 					break;
 				case ScreenMateStateID.Idle:
+
 					IdleCPUAnimation();
 					break;
 				default:
@@ -181,12 +184,24 @@ namespace ScreenMateNET.ViewModel
 		private void IdleAnimation()
 >>>>>>> Stashed changes
 		{
-			currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
+			double waitInFps = Math.Floor(LocalSettings.instance.Settings.WaitingToBoredInSec * 1000 /fpsTimer.Interval);
+			// idleCounter = (currentState == ScreenMateStateID.Idle || currentState == ScreenMateStateID.Bored) ? idleCounter + 1 : 0;
+			if (idleCounter == waitInFps) sleepingTime = 0;
+			if (idleCounter >= waitInFps) currentState = ScreenMateStateID.Bored;
+            else currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
+			idleCounter++;
+		}
+		private void BoredAnimation()
+		{
+			int offset = sleepingTime >= 4 ? 4 : 0;
+			currentBitmap = this.bitMapForStates[ScreenMateStateID.Bored][framecounter % 4 + offset];
+			sleepingTime++;
 		}
 
 		private void WarmCPUAnimation()
 		{
 			currentBitmap = this.bitMapForStates[ScreenMateStateID.WarmCPU][framecounter % 12];
+			idleCounter = 0;
 		}
 
 		/// <summary>
@@ -208,6 +223,7 @@ namespace ScreenMateNET.ViewModel
 				return;
             }
 			wasAlreadyHappy = false;
+			idleCounter = 0;
 			if (CurrentLocation.X + epsilon < mousePosition.X) nextLocation.X = currentLocation.X + speed;
 			if (CurrentLocation.X - epsilon > mousePosition.X) nextLocation.X = currentLocation.X - speed;
 			if (CurrentLocation.Y + epsilon < mousePosition.Y) nextLocation.Y = currentLocation.Y + speed;
@@ -224,6 +240,7 @@ namespace ScreenMateNET.ViewModel
 				mirrored.RotateFlip(RotateFlipType.RotateNoneFlipX);
 				currentBitmap = mirrored;
 			}
+			LocalSettings.Instance.Settings.Stamina+=10;
 		}
 
 		/// <summary>
