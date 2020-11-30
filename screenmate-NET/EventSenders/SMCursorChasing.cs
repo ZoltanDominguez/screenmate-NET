@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScreenMateNET.Model;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -16,13 +17,15 @@ namespace ScreenMateNET.EventSenders
 		{
 			while (true)
 			{
+				int restingTime = LocalSettings.Instance.Settings.Stamina < 5000 ? 5000 - LocalSettings.Instance.Settings.Stamina : 0;
+				Thread.Sleep(restingTime); // 5 másodperc után kezdi megint.
+
 				// Az egér pozícióját majd csak a form fogja tudni!
 				IsActive = true;
 				OnActiveStateChanged();
 				Thread.Sleep(10000); // 10 másodperc után elfárad, addig nem küld új eseményt
 				IsActive = false;
 				OnActiveStateChanged();
-				Thread.Sleep(5000); // 5 másodperc után kezdi megint.
 
 			}
 		}

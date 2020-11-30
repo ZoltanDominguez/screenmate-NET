@@ -41,7 +41,7 @@ namespace ScreenMateNET
 		int speed = 3;
 
 
-		ScreenMateStateID currentState = ScreenMateStateID.WarmCPU;
+		ScreenMateStateID currentState = ScreenMateStateID.Idle;
 		public event Action DrawNeededEvent;
 		private Timer fpsTimer;
 		private Timer stateChangeTimer;
@@ -205,6 +205,7 @@ namespace ScreenMateNET
 				mirrored.RotateFlip(RotateFlipType.RotateNoneFlipX);
 				currentBitmap = mirrored;
 			}
+			LocalSettings.Instance.Settings.Stamina+=10;
 		}
 
 		/// <summary>
