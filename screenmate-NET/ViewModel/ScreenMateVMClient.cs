@@ -40,6 +40,7 @@ namespace ScreenMateNET.ViewModel
 		int framecounter = 0;
 		int epsilon;
 		int speed = 3;
+		int stamina = 100;
 		private int charHeightOffset = 50;
 
 
@@ -64,6 +65,9 @@ namespace ScreenMateNET.ViewModel
 		/// </summary>
 		private ScreenMateVMClient()
 		{
+			speed = LocalSettings.Instance.Settings.Speed;
+			stamina = LocalSettings.Instance.Settings.Stamina;
+
 			epsilon = speed + 1; // it ensures it wont oscillate around it.
 			bitMapForStates = new Dictionary<ScreenMateStateID, List<Bitmap>>();
 			stateIsActiveMap = new Dictionary<ScreenMateStateID, bool>();
@@ -150,10 +154,6 @@ namespace ScreenMateNET.ViewModel
 		{
 			currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
 		}
-
-		[return: MarshalAs(UnmanagedType.Bool)]
-		[DllImport("user32.dll", SetLastError = true)]
-		private static extern bool GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
 
 		Point topWindowDestination = new Point();
 		int laydownindex = 0;
