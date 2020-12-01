@@ -181,19 +181,17 @@ namespace ScreenMateNET.ViewModel
 
 		private void IdleAnimation()
 		{
-            currentBitmap = this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10];
-			idleCounter++;
+            currentBitmap = FaceToDestination(System.Windows.Forms.Control.MousePosition, this.bitMapForStates[ScreenMateStateID.Idle][framecounter % 10]);
 		}
 		private void BoredAnimation()
 		{
-			currentBitmap = this.bitMapForStates[ScreenMateStateID.Bored][framecounter % 12];
+			currentBitmap = FaceToDestination(System.Windows.Forms.Control.MousePosition, this.bitMapForStates[ScreenMateStateID.Bored][framecounter % 12]);
 			sleepingTime++;
 		}
 
 		private void WarmCPUAnimation()
 		{
-			currentBitmap = this.bitMapForStates[ScreenMateStateID.WarmCPU][framecounter % 12];
-			idleCounter = 0;
+			currentBitmap = FaceToDestination(System.Windows.Forms.Control.MousePosition, this.bitMapForStates[ScreenMateStateID.WarmCPU][framecounter % 12]);
 		}
 
 		int runningStartTickStamp = 0;
