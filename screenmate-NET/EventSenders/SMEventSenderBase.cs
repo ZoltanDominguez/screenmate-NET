@@ -55,6 +55,7 @@ namespace ScreenMateNET
 			StateID = stateID;
 			TileSetFilePath = LocalSettings.Instance.StateSettings[stateID].FilePath;
 			thread = new Thread(EventListenerFunction);
+			thread.IsBackground = true;
 			thread.Start();
 		}
 
